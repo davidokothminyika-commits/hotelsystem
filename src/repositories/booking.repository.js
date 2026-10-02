@@ -183,7 +183,9 @@ const bookingRepository = {
 
         const where = conditions.length ? `WHERE ${conditions.map((c) => c.sql).join(' AND ')}` : '';
         const filterParams = Object.assign({}, ...conditions.map((c) => c.params ?? {}));
-        const sort = resolveSort(sortBy, sortDir, SORTABLE_BOOKING_COLUMNS, 'b.created_at');
+        // Newest first by default: a guest looking for the stay they just made should
+        // not have to scroll past their history.
+        const sort = resolveSort(sortBy, sortDir, SORTABLE_BOOKING_COLUMNS, 'b.created_at', 'DESC');
 
         const rows = await query(
             `SELECT b.*,

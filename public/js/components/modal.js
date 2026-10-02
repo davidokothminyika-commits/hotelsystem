@@ -44,10 +44,13 @@ let activeDialog = null;
  * @param {string} [options.bodyHtml]  Markup for the body. Project-authored only.
  * @param {Node}   [options.bodyNode]  Preferred over bodyHtml for API data.
  * @param {string} [options.footerHtml] Markup for the action buttons.
+ * @param {Node}   [options.footerNode] Preferred over footerHtml when the
+ *   caller needs to keep a reference to a real element, such as a submit
+ *   button that must be wired to live form state.
  * @param {'sm'|'lg'} [options.size='sm']
  * @returns {HTMLDialogElement}
  */
-export function createDialog({ title, description, bodyHtml, bodyNode, footerHtml, size = 'sm' }) {
+export function createDialog({ title, description, bodyHtml, bodyNode, footerHtml, footerNode, size = 'sm' }) {
     const dialog = document.createElement('dialog');
     dialog.className = `modal ${size === 'lg' ? 'modal-lg' : ''}`;
     dialog.setAttribute('aria-labelledby', 'modal-title');
@@ -97,10 +100,19 @@ export function createDialog({ title, description, bodyHtml, bodyNode, footerHtm
     panel.append(header, body);
 
     // ---- Footer ----
-    if (footerHtml) {
+    // A footerNode is preferred over footerHtml: it lets a caller supply a
+    // real element (a submit button already wired to form state) instead of
+    // markup that would then need to be found again in the DOM after opening.
+    if (footerHtml || footerNode) {
         const footer = document.createElement('div');
         footer.className = 'flex flex-col-reverse sm:flex-row sm:justify-end gap-2 p-5 pt-0';
-        footer.innerHTML = footerHtml;
+
+        if (footerNode) {
+            footer.appendChild(footerNode);
+        } else {
+            footer.innerHTML = footerHtml;
+        }
+
         panel.appendChild(footer);
     }
 

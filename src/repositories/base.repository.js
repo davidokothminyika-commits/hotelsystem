@@ -59,10 +59,18 @@ export function resolvePagination({ page = 1, limit = 20 } = {}) {
  * Sorting is the most common injection vector in a hand written API, because
  * `ORDER BY ?` cannot take a bound parameter. The direction is therefore
  * whitelisted, never passed through.
+ *
+ * @param {string} sortBy           Requested column.
+ * @param {string} sortDir          Requested direction.
+ * @param {string[]} allowedColumns Columns that may be sorted on.
+ * @param {string} fallback         Column used when the request is invalid.
+ * @param {'ASC'|'DESC'} [defaultDirection='ASC'] Direction used when the
+ *   caller does not supply one. Listings where the newest record matters most
+ *   (bookings, orders, payments) pass 'DESC' so the most recent appear first.
  */
-export function resolveSort(sortBy, sortDir, allowedColumns, fallback) {
+export function resolveSort(sortBy, sortDir, allowedColumns, fallback, defaultDirection = 'ASC') {
     const column = allowedColumns.includes(sortBy) ? sortBy : fallback;
-    const direction = String(sortDir).toLowerCase() === 'desc' ? 'DESC' : 'ASC';
+    const direction = String(sortDir).toLowerCase() === 'desc' ? 'DESC' : defaultDirection;
     return { column, direction };
 }
 

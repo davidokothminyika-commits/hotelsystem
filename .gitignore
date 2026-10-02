@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+package-lock.json.bak
+
+# Secrets and local environment
+.env
+.env.local
+.env.*.local
+
+# Runtime uploads (user supplied files)
+uploads/
+public/assets/uploads/*
+!public/assets/uploads/.gitkeep
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

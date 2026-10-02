@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create account | Aurelia Grand Hotel</title>
+    <meta name="description" content="Create an account to book rooms, order from the restaurant and manage your stay.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/css/app.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="h-full bg-stone-100">
+
+    <div class="min-h-full lg:grid lg:grid-cols-2">
+
+        <div class="flex flex-col justify-center px-6 py-12 sm:px-12">
+            <div class="mx-auto w-full max-w-md">
+
+                <a href="/" class="inline-flex items-center gap-2.5 mb-8">
+                    <span class="flex items-center justify-center w-10 h-10 rounded-lg bg-amber-600 text-stone-900">
+                        <i class="fa-solid fa-hotel" aria-hidden="true"></i>
+                    </span>
+                    <span>
+                        <span class="block text-base font-semibold text-stone-900 leading-tight">Aurelia Grand Hotel</span>
+                        <span class="block text-xs text-stone-500">Nairobi, Kenya</span>
+                    </span>
+                </a>
+
+                <h1 class="text-2xl font-bold text-stone-900 mb-1">Create your account</h1>
+                <p class="text-sm text-stone-500 mb-8">
+                    Book rooms, order from the restaurant and manage your stay.
+                </p>
+
+                <div id="form-alert" class="hidden rounded-lg border px-4 py-3 text-sm mb-5" role="alert"></div>
+
+                <form id="register-form" novalidate>
+
+                    <!-- Names sit side by side from small screens up -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
+                        <div class="field">
+                            <label for="firstName" class="form-label">First name</label>
+                            <input type="text" id="firstName" name="firstName"
+                                   class="form-input" autocomplete="given-name" required placeholder="Amara">
+                            <p class="form-error"></p>
+                        </div>
+                        <div class="field">
+                            <label for="lastName" class="form-label">Last name</label>
+                            <input type="text" id="lastName" name="lastName"
+                                   class="form-input" autocomplete="family-name" required placeholder="Osei">
+                            <p class="form-error"></p>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="email" class="form-label">Email address</label>
+                        <input type="email" id="email" name="email"
+                               class="form-input" autocomplete="email" required placeholder="you@example.com">
+                        <p class="form-hint">We will send a verification link to this address.</p>
+                        <p class="form-error"></p>
+                    </div>
+
+                    <div class="field">
+                        <label for="phone" class="form-label">
+                            Phone number <span class="text-stone-400 font-normal">(optional)</span>
+                        </label>
+                        <input type="tel" id="phone" name="phone"
+                               class="form-input" autocomplete="tel" placeholder="+254 700 000 000">
+                        <p class="form-hint">Used only if reception needs to reach you during your stay.</p>
+                        <p class="form-error"></p>
+                    </div>
+
+                    <div class="field">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="relative">
+                            <input type="password" id="password" name="password"
+                                   class="form-input pr-10" autocomplete="new-password" required
+                                   aria-describedby="password-strength password-error">
+                            <button type="button" id="toggle-password"
+                                    class="absolute inset-y-0 right-0 px-3 text-stone-400 hover:text-stone-700"
+                                    aria-label="Show password">
+                                <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+
+                        <!-- Strength meter. Rules mirror the server policy. -->
+                        <div id="password-strength" class="mt-2">
+                            <div class="flex gap-1 mb-1.5" aria-hidden="true">
+                                <span class="h-1 flex-1 rounded bg-stone-200"></span>
+                                <span class="h-1 flex-1 rounded bg-stone-200"></span>
+                                <span class="h-1 flex-1 rounded bg-stone-200"></span>
+                                <span class="h-1 flex-1 rounded bg-stone-200"></span>
+                            </div>
+                            <ul class="text-xs space-y-0.5" id="password-rules">
+                                <li data-rule="length"><i class="fa-regular fa-circle text-stone-300 mr-1.5" aria-hidden="true"></i>At least 8 characters</li>
+                                <li data-rule="lower"><i class="fa-regular fa-circle text-stone-300 mr-1.5" aria-hidden="true"></i>A lowercase letter</li>
+                                <li data-rule="upper"><i class="fa-regular fa-circle text-stone-300 mr-1.5" aria-hidden="true"></i>An uppercase letter</li>
+                                <li data-rule="number"><i class="fa-regular fa-circle text-stone-300 mr-1.5" aria-hidden="true"></i>A number</li>
+                            </ul>
+                        </div>
+                        <p class="form-error" id="password-error"></p>
+                    </div>
+
+                    <div class="field">
+                        <label for="confirmPassword" class="form-label">Confirm password</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword"
+                               class="form-input" autocomplete="new-password" required placeholder="Re-enter your password">
+                        <p class="form-error"></p>
+                    </div>
+
+                    <div class="field">
+                        <label class="flex items-start gap-2.5 cursor-pointer">
+                            <input type="checkbox" id="agreeToTerms" name="agreeToTerms"
+                                   class="mt-0.5 w-4 h-4 rounded border-stone-300 text-amber-600 focus:ring-amber-500"
+                                   required>
+                            <span class="text-sm text-stone-600">
+                                I agree to the terms of stay and the privacy policy.
+                            </span>
+                        </label>
+                        <p class="form-error"></p>
+                    </div>
+
+                    <button type="submit" id="submit-button" class="btn btn-primary btn-block btn-lg">
+                        Create account
+                    </button>
+                </form>
+
+                <p class="text-sm text-stone-600 mt-6 text-center">
+                    Already have an account?
+                    <a href="/pages/auth/login.html" class="text-amber-700 font-medium hover:underline">Sign in</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="hidden lg:block relative bg-stone-900">
+            <img src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=1600&q=80"
+                 alt="A bright hotel room with warm neutral tones"
+                 class="absolute inset-0 w-full h-full object-cover opacity-70">
+            <div class="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-900/40 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-12 text-white">
+                <ul class="space-y-4 max-w-md">
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-calendar-check mt-1 text-amber-400" aria-hidden="true"></i>
+                        <div>
+                            <p class="font-semibold">Book in seconds</p>
+                            <p class="text-sm text-stone-300">Real availability, confirmed instantly.</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-utensils mt-1 text-amber-400" aria-hidden="true"></i>
+                        <div>
+                            <p class="font-semibold">Order to your room</p>
+                            <p class="text-sm text-stone-300">The full kitchen menu, delivered.</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fa-solid fa-comments mt-1 text-amber-400" aria-hidden="true"></i>
+                        <div>
+                            <p class="font-semibold">Message reception</p>
+                            <p class="text-sm text-stone-300">Answers to requests within minutes.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import authApi from '/js/api/auth.js';
+        import { showAlert, showFieldErrors, clearFieldErrors } from '/js/components/notification.js';
+        import { setButtonLoading } from '/js/lib/dom.js';
+
+        const form = document.getElementById('register-form');
+        const alertBox = document.getElementById('form-alert');
+        const submitButton = document.getElementById('submit-button');
+        const passwordInput = document.getElementById('password');
+        const confirmInput = document.getElementById('confirmPassword');
+
+        // Already signed in: no reason to show a signup form.
+        const existing = await authApi.me();
+        if (existing) window.location.replace('/pages/guest/dashboard.html');
+
+        // ---- Password visibility ----
+        const toggleButton = document.getElementById('toggle-password');
+        toggleButton.addEventListener('click', () => {
+            const isHidden = passwordInput.type === 'password';
+            passwordInput.type = isHidden ? 'text' : 'password';
+            toggleButton.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+            toggleButton.querySelector('i').className = isHidden ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+        });
+
+        /**
+         * Live password strength feedback.
+         * The rules are identical to the server policy in auth.service.js, so
+         * a password that shows four ticks will be accepted.
+         */
+        const strengthBars = document.querySelectorAll('#password-strength .h-1');
+        const ruleItems = document.querySelectorAll('#password-rules li');
+
+        // Complete class names, never built by interpolation: the Tailwind CDN
+        // cannot see class names created at runtime.
+        const BAR_COLOURS = [
+            ['bg-red-500', 'bg-stone-200', 'bg-stone-200', 'bg-stone-200'],
+            ['bg-red-500', 'bg-amber-500', 'bg-stone-200', 'bg-stone-200'],
+            ['bg-amber-500', 'bg-amber-500', 'bg-amber-500', 'bg-stone-200'],
+            ['bg-green-600', 'bg-green-600', 'bg-green-600', 'bg-green-600'],
+        ];
+
+        function evaluatePassword(value) {
+            const checks = {
+                length: value.length >= 8,
+                lower: /[a-z]/.test(value),
+                upper: /[A-Z]/.test(value),
+                number: /\d/.test(value),
+            };
+
+            for (const item of ruleItems) {
+                const rule = item.dataset.rule;
+                const passed = checks[rule];
+                const icon = item.querySelector('i');
+                icon.className = passed
+                    ? 'fa-solid fa-circle-check text-green-600 mr-1.5'
+                    : 'fa-regular fa-circle text-stone-300 mr-1.5';
+                item.classList.toggle('text-stone-500', !passed);
+                item.classList.toggle('text-stone-700', passed);
+            }
+
+            const score = Object.values(checks).filter(Boolean).length;
+            const colours = BAR_COLOURS[score - 1] || BAR_COLOURS[0];
+
+            strengthBars.forEach((bar, index) => {
+                // Reset every class, then apply the one for this position.
+                bar.className = 'h-1 flex-1 rounded ' + colours[index];
+            });
+
+            return checks;
+        }
+
+        passwordInput.addEventListener('input', () => evaluatePassword(passwordInput.value));
+
+        // ---- Submit ----
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            clearFieldErrors(form);
+            alertBox.classList.add('hidden');
+
+            const payload = {
+                firstName: document.getElementById('firstName').value.trim(),
+                lastName: document.getElementById('lastName').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                password: passwordInput.value,
+                confirmPassword: confirmInput.value,
+            };
+
+            // Client side checks, so an obvious mistake costs no round trip.
+            // The server repeats all of this independently.
+            const checks = evaluatePassword(payload.password);
+            const failed = Object.entries(checks).filter(([, passed]) => !passed);
+
+            if (failed.length > 0) {
+                showAlert(alertBox, 'Please choose a stronger password. See the requirements below the field.', 'error');
+                passwordInput.focus();
+                return;
+            }
+
+            if (payload.password !== payload.confirmPassword) {
+                showAlert(alertBox, 'The two passwords do not match.', 'error');
+                confirmInput.focus();
+                return;
+            }
+
+            if (!document.getElementById('agreeToTerms').checked) {
+                showAlert(alertBox, 'Please accept the terms to continue.', 'error');
+                return;
+            }
+
+            setButtonLoading(submitButton, true, 'Creating account...');
+
+            try {
+                await authApi.register(payload);
+                // Registration signs the user in, so go straight to the dashboard.
+                window.location.href = '/pages/guest/dashboard.html?welcome=1';
+            } catch (error) {
+                setButtonLoading(submitButton, false);
+
+                if (error.errors) {
+                    showFieldErrors(form, error.errors);
+                } else {
+                    showAlert(alertBox, error.message, 'error');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

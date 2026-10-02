@@ -1,0 +1,57 @@
+<!--
+  components/sidebar.html
+  =====================
+  Dashboard sidebar, shared by the guest, staff and admin areas.
+
+  The navigation items are rendered by public/js/components/sidebar.js, which
+  receives the items for the current role. Rendering them from data rather than
+  hard coding them here means the guest, reception, housekeeping, restaurant,
+  manager and admin variants all use this one file.
+-->
+<aside id="app-sidebar" class="sidebar">
+    <div class="flex flex-col h-full">
+
+        <!-- Brand and collapse control -->
+        <div class="flex items-center justify-between gap-2 px-4 h-16 border-b border-stone-800">
+            <a href="/" class="flex items-center gap-2.5 min-w-0">
+                <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-600 text-stone-900 shrink-0">
+                    <i class="fa-solid fa-hotel" aria-hidden="true"></i>
+                </span>
+                <span class="sidebar-user-info min-w-0">
+                    <span class="block text-xs font-semibold text-white truncate">Aurelia Grand</span>
+                    <span class="block text-[10px] text-stone-500 truncate" id="sidebar-role">Dashboard</span>
+                </span>
+            </a>
+
+            <!-- Collapses to an icon rail on desktop, closes on mobile -->
+            <button type="button"
+                    id="sidebar-toggle"
+                    class="p-2 rounded-md text-stone-400 hover:text-white hover:bg-white/5 transition shrink-0"
+                    aria-label="Collapse sidebar"
+                    aria-expanded="true">
+                <i class="fa-solid fa-bars" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        <!-- Navigation, populated by sidebar.js -->
+        <nav id="sidebar-nav" class="flex-1 overflow-y-auto py-3" aria-label="Dashboard navigation">
+            <p class="px-4 py-2 text-xs text-stone-500">Loading navigation...</p>
+        </nav>
+
+        <!-- Signed in identity -->
+        <div class="px-4 py-3 border-t border-stone-800">
+            <div class="sidebar-user-info flex items-center gap-2.5">
+                <span id="sidebar-avatar"
+                      class="flex items-center justify-center w-8 h-8 rounded-full bg-amber-600 text-stone-900 text-xs font-bold shrink-0"
+                      aria-hidden="true">--</span>
+                <span class="min-w-0">
+                    <span class="block text-xs font-medium text-white truncate" id="sidebar-name"></span>
+                    <span class="block text-[10px] text-stone-500 truncate" id="sidebar-email"></span>
+                </span>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<!-- Dims the page behind the sidebar on small screens -->
+<div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>

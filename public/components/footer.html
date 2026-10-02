@@ -1,0 +1,82 @@
+<!--
+  components/footer.html
+  =====================
+  Shared site footer: contact details, quick links and legal line.
+  Loaded at runtime so it is defined once for the whole application.
+-->
+<footer class="bg-stone-900 text-stone-300 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-12">
+        <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+
+            <!-- Brand and address -->
+            <div>
+                <div class="flex items-center gap-2.5 mb-4">
+                    <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-amber-600 text-stone-900">
+                        <i class="fa-solid fa-hotel" aria-hidden="true"></i>
+                    </span>
+                    <span class="text-sm font-semibold text-white tracking-wide">Aurelia Grand Hotel</span>
+                </div>
+                <address class="not-italic text-sm space-y-1.5 leading-relaxed">
+                    <p class="flex items-start gap-2">
+                        <i class="fa-solid fa-location-dot mt-1 text-stone-500" aria-hidden="true"></i>
+                        <span>24 Riverside Drive<br>Nairobi, Kenya</span>
+                    </p>
+                    <p class="flex items-center gap-2">
+                        <i class="fa-solid fa-phone text-stone-500" aria-hidden="true"></i>
+                        <a href="tel:+254700000000" class="hover:text-white transition">+254 700 000 000</a>
+                    </p>
+                    <p class="flex items-center gap-2">
+                        <i class="fa-solid fa-envelope text-stone-500" aria-hidden="true"></i>
+                        <a href="mailto:reservations@example.com" class="hover:text-white transition">reservations@example.com</a>
+                    </p>
+                </address>
+            </div>
+
+            <!-- Guest links -->
+            <nav aria-labelledby="footer-stay">
+                <h2 id="footer-stay" class="text-sm font-semibold text-white mb-4">Your stay</h2>
+                <ul class="space-y-2.5 text-sm">
+                    <li><a href="/pages/guest/rooms.html" class="hover:text-white transition">Book a room</a></li>
+                    <li><a href="/pages/guest/rooms.html" class="hover:text-white transition">Room types</a></li>
+                    <li><a href="/pages/guest/bookings.html" class="hover:text-white transition">My bookings</a></li>
+                    <li><a href="/pages/guest/restaurant.html" class="hover:text-white transition">Restaurant menu</a></li>
+                    <li><a href="/pages/guest/messages.html" class="hover:text-white transition">Contact reception</a></li>
+                </ul>
+            </nav>
+
+            <!-- Hotel links -->
+            <nav aria-labelledby="footer-hotel">
+                <h2 id="footer-hotel" class="text-sm font-semibold text-white mb-4">The hotel</h2>
+                <ul class="space-y-2.5 text-sm">
+                    <li><a href="/#amenities" class="hover:text-white transition">Amenities</a></li>
+                    <li><a href="/#offers" class="hover:text-white transition">Special offers</a></li>
+                    <li><a href="/#gallery" class="hover:text-white transition">Gallery</a></li>
+                    <li><a href="/#reviews" class="hover:text-white transition">Guest reviews</a></li>
+                    <li><a href="/#location" class="hover:text-white transition">Find us</a></li>
+                </ul>
+            </nav>
+
+            <!-- Staff sign in -->
+            <div>
+                <h2 class="text-sm font-semibold text-white mb-4">Staff</h2>
+                <p class="text-sm mb-4 leading-relaxed">
+                    Hotel team access for reception, restaurant, housekeeping and management.
+                </p>
+                <a href="/pages/auth/login.html" class="btn btn-outline btn-sm text-stone-100 border-stone-600 hover:bg-white/10">
+                    <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
+                    Staff sign in
+                </a>
+            </div>
+        </div>
+
+        <div class="mt-10 pt-6 border-t border-stone-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p class="text-xs text-stone-500">
+                &copy; <span id="footer-year">2026</span> Aurelia Grand Hotel. All rights reserved.
+            </p>
+            <p class="text-xs text-stone-500 flex items-center gap-1.5">
+                <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                Secure payments, no card details stored
+            </p>
+        </div>
+    </div>
+</footer>

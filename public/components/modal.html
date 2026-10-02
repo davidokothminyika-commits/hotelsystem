@@ -1,0 +1,16 @@
+<!--
+  components/modal.html
+  ==================
+  Mount point for dynamically created dialogs.
+
+  The markup is intentionally empty apart from a heading for screen readers.
+  Dialogs themselves are built by public/js/components/modal.js and appended
+  here at runtime, because a modal's content depends entirely on what the page
+  is doing.
+
+  Having a fixed mount point means the dialog element is always in a known
+  place in the DOM, which keeps stacking and cleanup predictable.
+-->
+<div id="modal-root-slot">
+    <div id="modal-root"></div>
+</div>

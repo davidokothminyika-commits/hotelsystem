@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in | Aurelia Grand Hotel</title>
+    <meta name="description" content="Sign in to manage your bookings, dining and messages at Aurelia Grand Hotel.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/css/app.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="h-full bg-stone-100">
+
+    <!-- Two column layout: form on the left, imagery on the right from large screens up -->
+    <div class="min-h-full lg:grid lg:grid-cols-2">
+
+        <!-- Form side -->
+        <div class="flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-16">
+            <div class="mx-auto w-full max-w-sm">
+
+                <!-- Brand -->
+                <a href="/" class="inline-flex items-center gap-2.5 mb-10">
+                    <span class="flex items-center justify-center w-10 h-10 rounded-lg bg-amber-600 text-stone-900">
+                        <i class="fa-solid fa-hotel" aria-hidden="true"></i>
+                    </span>
+                    <span>
+                        <span class="block text-base font-semibold text-stone-900 leading-tight">Aurelia Grand Hotel</span>
+                        <span class="block text-xs text-stone-500">Nairobi, Kenya</span>
+                    </span>
+                </a>
+
+                <h1 class="text-2xl font-bold text-stone-900 mb-1">Welcome back</h1>
+                <p class="text-sm text-stone-500 mb-8">
+                    Sign in to manage your bookings, dining and messages.
+                </p>
+
+                <!-- Form level error banner -->
+                <div id="form-alert" class="hidden rounded-lg border px-4 py-3 text-sm mb-5" role="alert"></div>
+
+                <form id="login-form" novalidate>
+                    <div class="field">
+                        <label for="email" class="form-label">Email address</label>
+                        <input type="email"
+                               id="email"
+                               name="email"
+                               class="form-input"
+                               autocomplete="email"
+                               required
+                               placeholder="you@example.com">
+                        <p class="form-error" id="email-error"></p>
+                    </div>
+
+                    <div class="field">
+                        <div class="flex items-center justify-between">
+                            <label for="password" class="form-label">Password</label>
+                            <a href="/pages/auth/forgot-password.html" class="text-xs text-amber-700 hover:underline mb-1.5">
+                                Forgot password?
+                            </a>
+                        </div>
+                        <div class="relative">
+                            <input type="password"
+                                   id="password"
+                                   name="password"
+                                   class="form-input pr-10"
+                                   autocomplete="current-password"
+                                   required
+                                   placeholder="Enter your password">
+                            <!-- Toggles input type. Labelled for screen readers. -->
+                            <button type="button"
+                                    id="toggle-password"
+                                    class="absolute inset-y-0 right-0 px-3 text-stone-400 hover:text-stone-700"
+                                    aria-label="Show password">
+                                <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <p class="form-error" id="password-error"></p>
+                    </div>
+
+                    <button type="submit" id="submit-button" class="btn btn-primary btn-block btn-lg mt-2">
+                        Sign in
+                    </button>
+                </form>
+
+                <p class="text-sm text-stone-600 mt-6 text-center">
+                    New to Aurelia Grand?
+                    <a href="/pages/auth/register.html" class="text-amber-700 font-medium hover:underline">Create an account</a>
+                </p>
+
+                <!-- Demo accounts make the system explorable without setup -->
+                <div class="mt-8 pt-6 border-t border-stone-200">
+                    <p class="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-3">
+                        Demo accounts
+                    </p>
+                    <div class="grid gap-1.5" id="demo-accounts">
+                        <p class="text-xs text-stone-400">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Imagery side, hidden on small screens -->
+        <div class="hidden lg:block relative bg-stone-900">
+            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1600&q=80"
+                 alt="Aurelia Grand Hotel lobby with warm evening lighting"
+                 class="absolute inset-0 w-full h-full object-cover opacity-70">
+            <div class="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-900/40 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-12 text-white">
+                <blockquote class="max-w-md">
+                    <p class="text-xl leading-relaxed mb-4">
+                        "A quiet riverside address in the heart of the city, with a kitchen
+                        worth staying in for and a team that remembers your name."
+                    </p>
+                    <footer class="text-sm text-stone-300">
+                        Aurelia Grand Hotel, Nairobi
+                    </footer>
+                </blockquote>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import authApi from '/js/api/auth.js';
+        import { landingPageFor } from '/js/components/header.js';
+        import { showAlert, showFieldErrors, clearFieldErrors } from '/js/components/notification.js';
+        import { setButtonLoading, getQueryParam } from '/js/lib/dom.js';
+
+        const form = document.getElementById('login-form');
+        const alertBox = document.getElementById('form-alert');
+        const submitButton = document.getElementById('submit-button');
+
+        // Already signed in? Go straight to the right dashboard rather than
+        // showing a login form that would just fail.
+        const existingUser = await authApi.me();
+        if (existingUser) {
+            window.location.replace(landingPageFor(existingUser.role));
+        }
+
+        // ---- Password visibility toggle ----
+        const passwordInput = document.getElementById('password');
+        const toggleButton = document.getElementById('toggle-password');
+
+        toggleButton.addEventListener('click', () => {
+            const isHidden = passwordInput.type === 'password';
+            passwordInput.type = isHidden ? 'text' : 'password';
+            toggleButton.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+            toggleButton.querySelector('i').className = isHidden ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+        });
+
+        // ---- Demo accounts ----
+        // Clicking one fills the form so the system can be explored quickly.
+        const DEMO_ACCOUNTS = [
+            { label: 'Administrator', email: 'admin@example.com', password: 'Admin@1234' },
+            { label: 'Reception', email: 'reception@example.com', password: 'Reception@1234' },
+            { label: 'Restaurant staff', email: 'restaurant@example.com', password: 'Restaurant@1234' },
+            { label: 'Housekeeping', email: 'housekeeping@example.com', password: 'Housekeep@1234' },
+            { label: 'Manager', email: 'manager@example.com', password: 'Manager@1234' },
+            { label: 'Guest', email: 'guest@example.com', password: 'Guest@1234' },
+        ];
+
+        const demoContainer = document.getElementById('demo-accounts');
+        demoContainer.textContent = '';
+
+        for (const account of DEMO_ACCOUNTS) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'text-left text-xs px-3 py-2 rounded-md bg-white border border-stone-200 hover:border-amber-500 hover:bg-amber-50 transition';
+
+            const label = document.createElement('span');
+            label.className = 'font-medium text-stone-800 block';
+            label.textContent = account.label;
+
+            const email = document.createElement('span');
+            email.className = 'text-stone-500 block';
+            email.textContent = account.email;
+
+            button.append(label, email);
+            button.addEventListener('click', () => {
+                document.getElementById('email').value = account.email;
+                document.getElementById('password').value = account.password;
+                form.requestSubmit();
+            });
+
+            demoContainer.appendChild(button);
+        }
+
+        // ---- Submit ----
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            clearFieldErrors(form);
+            alertBox.classList.add('hidden');
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            // Client side checks first, so an obvious mistake does not cost a
+            // round trip. The server validates independently either way.
+            if (!email || !password) {
+                showAlert(alertBox, 'Please enter both your email address and password.', 'error');
+                return;
+            }
+
+            setButtonLoading(submitButton, true, 'Signing in...');
+
+            try {
+                const result = await authApi.login(email, password);
+                const user = result.data.user;
+
+                // Return the user to the page they were trying to reach, but
+                // only for a real in-app path. An absolute URL could send them
+                // to another site, so only same-origin paths are accepted.
+                const returnTo = getQueryParam('returnTo');
+                const destination =
+                    returnTo && returnTo.startsWith('/') && !returnTo.startsWith('//')
+                        ? returnTo
+                        : landingPageFor(user.role);
+
+                window.location.href = destination;
+            } catch (error) {
+                setButtonLoading(submitButton, false);
+
+                if (error.errors) {
+                    showFieldErrors(form, error.errors);
+                } else {
+                    showAlert(alertBox, error.message, 'error');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

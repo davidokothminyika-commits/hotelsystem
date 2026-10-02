@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurelia Grand Hotel | Riverside rooms and dining in Nairobi</title>
+    <meta name="description" content="A quiet riverside hotel in Nairobi. Sixty rooms and suites, a seasonal kitchen, and a team that remembers your name.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/css/app.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="h-full bg-white flex flex-col">
+
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Shared header, loaded at runtime so it is defined once for the app -->
+    <div id="app-header"></div>
+
+    <main id="main-content" class="flex-1">
+
+        <!-- ================================================================
+             HERO
+             Full height on large screens, with the availability search
+             overlaid at the bottom so it is the first interactive element.
+             ================================================================ -->
+        <section class="relative bg-stone-900 min-h-[600px] lg:min-h-[680px] flex items-center">
+            <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=2000&q=80"
+                 alt="The exterior of Aurelia Grand Hotel at dusk"
+                 class="absolute inset-0 w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-b from-stone-900/70 via-stone-900/50 to-stone-900/80"></div>
+
+            <div class="relative w-full max-w-7xl mx-auto px-4 sm:px-6 py-20 text-center text-white">
+                <p class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-400 mb-6">
+                    <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                    Riverside Drive, Nairobi
+                </p>
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6 max-w-3xl mx-auto leading-tight">
+                    A quieter side of the city
+                </h1>
+                <p class="text-lg sm:text-xl text-stone-200 max-w-2xl mx-auto mb-10 leading-relaxed">
+                    Sixty rooms above the river, a kitchen that changes with the season,
+                    and a team who remembers how you take your coffee.
+                </p>
+
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                    <a href="/pages/guest/rooms.html" class="btn btn-primary btn-lg">
+                        <i class="fa-solid fa-bed" aria-hidden="true"></i>
+                        Check availability
+                    </a>
+                    <a href="/pages/guest/restaurant.html" class="btn btn-outline btn-lg text-white border-white/40 hover:bg-white/10">
+                        <i class="fa-solid fa-utensils" aria-hidden="true"></i>
+                        View the menu
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             AVAILABILITY SEARCH
+             Sits directly below the hero rather than overlapping it, which
+             keeps the hero image uncluttered and the form fully visible on
+             small screens.
+             ================================================================ -->
+        <section class="relative z-10 -mt-10 px-4 sm:px-6">
+            <div class="max-w-5xl mx-auto">
+                <form id="availability-form"
+                      class="card shadow-lg p-5 sm:p-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5 items-end">
+
+                    <div class="lg:col-span-2">
+                        <label for="checkIn" class="form-label">Check in</label>
+                        <input type="date" id="checkIn" name="checkIn" class="form-input" required>
+                    </div>
+
+                    <div>
+                        <label for="checkOut" class="form-label">Check out</label>
+                        <input type="date" id="checkOut" name="checkOut" class="form-input" required>
+                    </div>
+
+                    <div>
+                        <label for="guests" class="form-label">Guests</label>
+                        <select id="guests" name="guests" class="form-select">
+                            <option value="1">1 guest</option>
+                            <option value="2" selected>2 guests</option>
+                            <option value="3">3 guests</option>
+                            <option value="4">4 guests</option>
+                            <option value="5">5 guests</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                            Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             INTRODUCTION
+             ================================================================ -->
+        <section class="py-20 px-4 sm:px-6">
+            <div class="max-w-6xl mx-auto grid gap-12 lg:grid-cols-2 items-center">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 mb-3">The hotel</p>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-stone-900 mb-5 leading-tight">
+                        Built for staying in rather than passing through
+                    </h2>
+                    <p class="text-stone-600 leading-relaxed mb-4">
+                        Aurelia Grand opened in 1974 on the north bank of the river and has been
+                        run by the same family ever since. Sixty rooms, no two identical, spread
+                        over four floors with a rooftop terrace that looks back toward the skyline.
+                    </p>
+                    <p class="text-stone-600 leading-relaxed mb-6">
+                        The kitchen works with four growers within a day's drive of Nairobi, which
+                        means the breakfast buffet changes through the year rather than repeating.
+                        Reception is staffed around the clock, and the team is small enough that
+                        most of them have been here a decade.
+                    </p>
+
+                    <dl class="grid grid-cols-3 gap-6 pt-6 border-t border-stone-200">
+                        <div>
+                            <dt class="text-xs text-stone-500 uppercase tracking-wide">Rooms</dt>
+                            <dd class="text-2xl font-bold text-stone-900 mt-1">60</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs text-stone-500 uppercase tracking-wide">Opened</dt>
+                            <dd class="text-2xl font-bold text-stone-900 mt-1">1974</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs text-stone-500 uppercase tracking-wide">Rating</dt>
+                            <dd class="text-2xl font-bold text-stone-900 mt-1 flex items-center gap-1.5">
+                                4.7
+                                <i class="fa-solid fa-star text-amber-500 text-base" aria-hidden="true"></i>
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80"
+                         alt="A hotel bedroom with a king bed and city view"
+                         class="rounded-xl w-full h-64 lg:h-80 object-cover">
+                    <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80"
+                         alt="A hotel bathroom with a large bathtub"
+                         class="rounded-xl w-full h-64 lg:h-80 object-cover mt-8">
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             ROOM TYPES
+             Loaded from the API so the page always reflects the real
+             inventory rather than a hard coded copy that could drift.
+             ================================================================ -->
+        <section class="py-20 px-4 sm:px-6 bg-stone-50" id="rooms">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex flex-wrap items-end justify-between gap-4 mb-10">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 mb-3">Accommodation</p>
+                        <h2 class="text-3xl sm:text-4xl font-bold text-stone-900">Rooms and suites</h2>
+                    </div>
+                    <a href="/pages/guest/rooms.html" class="btn btn-outline">
+                        All rooms
+                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    </a>
+                </div>
+
+                <!-- Populated by the room type renderer at the bottom of this file -->
+                <div id="room-types-grid" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    <!-- Skeletons while loading, so the layout does not jump -->
+                    <div class="skeleton h-80 rounded-xl"></div>
+                    <div class="skeleton h-80 rounded-xl"></div>
+                    <div class="skeleton h-80 rounded-xl"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             AMENITIES
+             ================================================================ -->
+        <section class="py-20 px-4 sm:px-6" id="amenities">
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-12">
+                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 mb-3">What is here</p>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-stone-900">Amenities</h2>
+                </div>
+
+                <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    <article class="card card-hover p-6">
+                        <span class="flex items-center justify-center w-11 h-11 rounded-lg bg-amber-100 text-amber-700 mb-4">
+                            <i class="fa-solid fa-wifi" aria-hidden="true"></i>
+                        </span>
+                        <h3 class="font-semibold text-stone-900 mb-1.5">WiFi throughout</h3>
+                        <p class="text-sm text-stone-500 leading-relaxed">Fibre in every room and public space.</p>
+                    </article>
+
+                    <article class="card card-hover p-6">
+                        <span class="flex items-center justify-center w-11 h-11 rounded-lg bg-amber-100 text-amber-700 mb-4">
+                            <i class="fa-solid fa-utensils" aria-hidden="true"></i>
+                        </span>
+                        <h3 class="font-semibold text-stone-900 mb-1.5">Seasonal restaurant</h3>
+                        <p class="text-sm text-stone-500 leading-relaxed">Breakfast, lunch and dinner, plus room service.</p>
+                    </article>
+
+                    <article class="card card-hover p-6">
+                        <span class="flex items-center justify-center w-11 h-11 rounded-lg bg-amber-100 text-amber-700 mb-4">
+                            <i class="fa-solid fa-dumbbell" aria-hidden="true"></i>
+                        </span>
+                        <h3 class="font-semibold text-stone-900 mb-1.5">Rooftop terrace</h3>
+                        <p class="text-sm text-stone-500 leading-relaxed">Open from six, with a view across the skyline.</p>
+                    </article>
+
+                    <article class="card card-hover p-6">
+                        <span class="flex items-center justify-center w-11 h-11 rounded-lg bg-amber-100 text-amber-700 mb-4">
+                            <i class="fa-solid fa-concierge-bell" aria-hidden="true"></i>
+                        </span>
+                        <h3 class="font-semibold text-stone-900 mb-1.5">24 hour reception</h3>
+                        <p class="text-sm text-stone-500 leading-relaxed">Staffed around the clock for arrivals and requests.</p>
+                    </article>
+
+                    <article class="card card-hover p-6">
+                        <span class="flex items-center justify-center w-11 h-11 rounded-lg bg-amber-100 text-amber-700 mb-4">
+                            <i class="fa-solid fa-car" aria-hidden="true"></i>
+                        </span>
+                        <h3 class="font-semibold text-stone-900 mb-1.5">Secure parking</h3>
+                        <p class="text-sm text-stone-500 leading-relaxed">Covered parking on site, with valet on request.</p>
+                    </article>
+
+                    <article class="card card-hover p-6">
+                        <span class="flex items-center justify-center w-11 h-11 rounded-lg bg-amber-100 text-amber-700 mb-4">
+                            <i class="fa-solid fa-tshirt" aria-hidden="true"></i>
+                        </span>
+                        <h3 class="font-semibold text-stone-900 mb-1.5">Laundry service</h3>
+                        <p class="text-sm text-stone-500 leading-relaxed">Same day turnaround before 10am.</p>
+                    </article>
+
+                    <article class="card card-hover p-6">
+                        <span class="flex items-center justify-center w-11 h-11 rounded-lg bg-amber-100 text-amber-700 mb-4">
+                            <i class="fa-solid fa-heart-pulse" aria-hidden="true"></i>
+                        </span>
+                        <h3 class="font-semibold text-stone-900 mb-1.5">Fitness room</h3>
+                        <p class="text-sm text-stone-500 leading-relaxed">Cardio and free weights, open from five.</p>
+                    </article>
+
+                    <article class="card card-hover p-6">
+                        <span class="flex items-center justify-center w-11 h-11 rounded-lg bg-amber-100 text-amber-700 mb-4">
+                            <i class="fa-solid fa-champagne-glasses" aria-hidden="true"></i>
+                        </span>
+                        <h3 class="font-semibold text-stone-900 mb-1.5">Function rooms</h3>
+                        <p class="text-sm text-stone-500 leading-relaxed">Two rooms for up to eighty seated guests.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             RESTAURANT
+             ================================================================ -->
+        <section class="py-20 px-4 sm:px-6 bg-stone-900 text-white" id="restaurant">
+            <div class="max-w-7xl mx-auto grid gap-12 lg:grid-cols-2 items-center">
+                <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1200&q=80"
+                     alt="A plated seasonal dish on a restaurant table"
+                     class="rounded-xl w-full h-80 lg:h-[480px] object-cover">
+
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-400 mb-3">Dining</p>
+                    <h2 class="text-3xl sm:text-4xl font-bold mb-5 leading-tight">
+                        The kitchen follows the season, not a fixed menu
+                    </h2>
+                    <p class="text-stone-300 leading-relaxed mb-4">
+                        The restaurant serves breakfast from six and dinner until ten, with a short
+                        lunch menu for business guests. The menu changes when the produce does,
+                        which means the card is rewritten most weeks.
+                    </p>
+                    <p class="text-stone-300 leading-relaxed mb-8">
+                        Guests in house can order from the same menu through room service, delivered
+                        to the room within forty minutes.
+                    </p>
+
+                    <div class="flex flex-wrap gap-3">
+                        <a href="/pages/guest/restaurant.html" class="btn btn-primary">
+                            <i class="fa-solid fa-utensils" aria-hidden="true"></i>
+                            Browse the menu
+                        </a>
+                        <a href="/pages/guest/orders.html" class="btn btn-outline text-white border-white/30 hover:bg-white/10">
+                            My orders
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             SPECIAL OFFERS
+             ================================================================ -->
+        <section class="py-20 px-4 sm:px-6" id="offers">
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-12">
+                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 mb-3">Rates</p>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-stone-900">Special offers</h2>
+                </div>
+
+                <div class="grid gap-6 md:grid-cols-3">
+                    <article class="card card-hover overflow-hidden flex flex-col">
+                        <div class="bg-stone-900 text-white px-6 py-4">
+                            <span class="badge badge-accent">Popular</span>
+                            <h3 class="text-xl font-bold mt-3">Stay three, pay for two</h3>
+                        </div>
+                        <div class="card-body flex-1">
+                            <p class="text-sm text-stone-600 leading-relaxed mb-4">
+                                Book three consecutive nights in any room type and the third is
+                                complimentary, including breakfast. Available Sunday to Thursday.
+                            </p>
+                            <ul class="text-sm text-stone-500 space-y-1.5 mb-5">
+                                <li><i class="fa-solid fa-check text-green-600 mr-2" aria-hidden="true"></i>Includes breakfast</li>
+                                <li><i class="fa-solid fa-check text-green-600 mr-2" aria-hidden="true"></i>Free cancellation until 48h prior</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer">
+                            <a href="/pages/guest/rooms.html" class="btn btn-primary btn-block">Book this rate</a>
+                        </div>
+                    </article>
+
+                    <article class="card card-hover overflow-hidden flex flex-col">
+                        <div class="bg-stone-900 text-white px-6 py-4">
+                            <span class="badge badge-info">Long stay</span>
+                            <h3 class="text-xl font-bold mt-3">A week or more</h3>
+                        </div>
+                        <div class="card-body flex-1">
+                            <p class="text-sm text-stone-600 leading-relaxed mb-4">
+                                Seven nights or longer in a suite or family room, at 25% below the
+                                nightly rate, with laundry included once during your stay.
+                            </p>
+                            <ul class="text-sm text-stone-500 space-y-1.5 mb-5">
+                                <li><i class="fa-solid fa-check text-green-600 mr-2" aria-hidden="true"></i>Suite or family room</li>
+                                <li><i class="fa-solid fa-check text-green-600 mr-2" aria-hidden="true"></i>Laundry included</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer">
+                            <a href="/pages/guest/rooms.html" class="btn btn-primary btn-block">Check availability</a>
+                        </div>
+                    </article>
+
+                    <article class="card card-hover overflow-hidden flex flex-col">
+                        <div class="bg-stone-900 text-white px-6 py-4">
+                            <span class="badge badge-success">Dining</span>
+                            <h3 class="text-xl font-bold mt-3">Dinner included</h3>
+                        </div>
+                        <div class="card-body flex-1">
+                            <p class="text-sm text-stone-600 leading-relaxed mb-4">
+                                Book any three night stay with dinner at the restaurant on the
+                                night of your arrival, chosen from the seasonal menu.
+                            </p>
+                            <ul class="text-sm text-stone-500 space-y-1.5 mb-5">
+                                <li><i class="fa-solid fa-check text-green-600 mr-2" aria-hidden="true"></i>Three courses</li>
+                                <li><i class="fa-solid fa-check text-green-600 mr-2" aria-hidden="true"></i>Any room type</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer">
+                            <a href="/pages/guest/restaurant.html" class="btn btn-primary btn-block">See the menu</a>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             GALLERY
+             ================================================================ -->
+        <section class="py-20 px-4 sm:px-6 bg-stone-50" id="gallery">
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-12">
+                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 mb-3">The hotel</p>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-stone-900">Gallery</h2>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <img src="https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=800&q=80"
+                         alt="Aurelia Grand Hotel reception hall" class="rounded-lg w-full h-48 md:h-64 object-cover">
+                    <img src="https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=800&q=80"
+                         alt="Aurelia Grand Hotel suite living area" class="rounded-lg w-full h-48 md:h-64 object-cover">
+                    <img src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=800&q=80"
+                         alt="The hotel pool terrace at sunset" class="rounded-lg w-full h-48 md:h-64 object-cover">
+                    <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80"
+                         alt="A guest room with a river view" class="rounded-lg w-full h-48 md:h-64 object-cover">
+                    <img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80"
+                         alt="Aurelia Grand Hotel rooftop terrace" class="rounded-lg w-full h-48 md:h-64 object-cover">
+                    <img src="https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=800&q=80"
+                         alt="The hotel lobby seating area" class="rounded-lg w-full h-48 md:h-64 object-cover">
+                    <img src="https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=800&q=80"
+                         alt="A standard room interior" class="rounded-lg w-full h-48 md:h-64 object-cover">
+                    <img src="https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=800&q=80"
+                         alt="The rooftop bar at evening" class="rounded-lg w-full h-48 md:h-64 object-cover">
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             REVIEWS
+             Loaded from /api/reviews so the ratings are real, computed from
+             the reviews table rather than hard coded.
+             ================================================================ -->
+        <section class="py-20 px-4 sm:px-6" id="reviews">
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-12">
+                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 mb-3">Guest feedback</p>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-stone-900">What guests say</h2>
+                </div>
+
+                <div id="reviews-container" class="grid gap-6 md:grid-cols-3">
+                    <div class="skeleton h-48 rounded-xl"></div>
+                    <div class="skeleton h-48 rounded-xl"></div>
+                    <div class="skeleton h-48 rounded-xl"></div>
+                </div>
+
+                <div class="text-center mt-10">
+                    <a href="/pages/guest/reviews.html" class="btn btn-outline">
+                        Read all reviews
+                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             LOCATION AND CONTACT
+             ================================================================ -->
+        <section class="py-20 px-4 sm:px-6 bg-stone-50" id="location">
+            <div class="max-w-7xl mx-auto grid gap-12 lg:grid-cols-2">
+
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 mb-3">Finding us</p>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-stone-900 mb-6">Location and contact</h2>
+
+                    <div class="space-y-6">
+                        <div class="flex items-start gap-4">
+                            <span class="flex items-center justify-center w-10 h-10 rounded-lg bg-white border border-stone-200 text-stone-600 shrink-0">
+                                <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                            </span>
+                            <div>
+                                <h3 class="font-semibold text-stone-900">Address</h3>
+                                <p class="text-sm text-stone-500 mt-0.5">
+                                    24 Riverside Drive, Nairobi, Kenya
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4">
+                            <span class="flex items-center justify-center w-10 h-10 rounded-lg bg-white border border-stone-200 text-stone-600 shrink-0">
+                                <i class="fa-solid fa-phone" aria-hidden="true"></i>
+                            </span>
+                            <div>
+                                <h3 class="font-semibold text-stone-900">Reservations</h3>
+                                <p class="text-sm text-stone-500 mt-0.5">
+                                    <a href="tel:+254700000000" class="hover:text-amber-700 transition">+254 700 000 000</a>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4">
+                            <span class="flex items-center justify-center w-10 h-10 rounded-lg bg-white border border-stone-200 text-stone-600 shrink-0">
+                                <i class="fa-solid fa-envelope" aria-hidden="true"></i>
+                            </span>
+                            <div>
+                                <h3 class="font-semibold text-stone-900">Email</h3>
+                                <p class="text-sm text-stone-500 mt-0.5">
+                                    <a href="mailto:reservations@example.com" class="hover:text-amber-700 transition">reservations@example.com</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Getting here, useful without a maps API dependency -->
+                    <div class="mt-8 pt-6 border-t border-stone-200">
+                        <h3 class="font-semibold text-stone-900 mb-3">Getting here</h3>
+                        <ul class="space-y-2 text-sm text-stone-600">
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-plane mt-0.5 text-stone-400 w-4 shrink-0" aria-hidden="true"></i>
+                                <span>25 minutes from Jomo Kenyatta International Airport by taxi.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-train mt-0.5 text-stone-400 w-4 shrink-0" aria-hidden="true"></i>
+                                <span>Ten minutes walk from Nairobi Central railway station.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-bus mt-0.5 text-stone-400 w-4 shrink-0" aria-hidden="true"></i>
+                                <span>Served by the Riverside and Park Lines.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Stylised map: a static illustration rather than a third
+                     party embed, so the page works with no external key. -->
+                <div class="relative rounded-xl overflow-hidden border border-stone-200 bg-stone-200 h-80 lg:h-auto min-h-[380px]">
+                    <img src="https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=1200&q=80"
+                         alt="Map showing the location of Aurelia Grand Hotel on Riverside Drive"
+                         class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-stone-900/10"></div>
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                        <span class="flex items-center justify-center w-12 h-12 rounded-full bg-amber-600 text-stone-900 shadow-lg">
+                            <i class="fa-solid fa-hotel" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             CONTACT FORM
+             Posts to the chat system, which is a real endpoint rather than a
+             decorative form.
+             ================================================================ -->
+        <section class="py-20 px-4 sm:px-6" id="contact">
+            <div class="max-w-3xl mx-auto">
+                <div class="text-center mb-10">
+                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 mb-3">Enquiries</p>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-stone-900">Get in touch</h2>
+                    <p class="text-stone-500 mt-3">
+                        Send a message and reception will reply, usually within the hour.
+                    </p>
+                </div>
+
+                <div id="contact-alert" class="hidden rounded-lg border px-4 py-3 text-sm mb-5" role="alert"></div>
+
+                <form id="contact-form" class="card p-6 sm:p-8">
+                    <div class="field">
+                        <label for="contact-name" class="form-label">Your name</label>
+                        <input type="text" id="contact-name" class="form-input" required placeholder="Amara Osei">
+                    </div>
+
+                    <div class="field">
+                        <label for="contact-email" class="form-label">Email address</label>
+                        <input type="email" id="contact-email" class="form-input" required placeholder="you@example.com">
+                    </div>
+
+                    <div class="field">
+                        <label for="contact-message" class="form-label">How can we help?</label>
+                        <textarea id="contact-message" rows="4" class="form-textarea" required
+                                  placeholder="I would like to arrange a late check-out on Friday."></textarea>
+                    </div>
+
+                    <button type="submit" id="contact-submit" class="btn btn-primary btn-block">
+                        <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
+                        Send message
+                    </button>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="app-footer"></div>
+    <div id="modal-root-slot"></div>
+
+    <script type="module">
+        import { initApp, notify, showAlert, setButtonLoading, formatMoney, formatRating } from '/js/app.js';
+        import roomsApi from '/js/api/rooms.js';
+        import api from '/js/api/api.js';
+        import { showSkeleton, showEmptyState } from '/js/lib/dom.js';
+
+        await initApp();
+
+        // =====================================================================
+        // Availability search
+        // The defaults are tomorrow and three days after it, which is the most
+        // common short stay and means the form is useful immediately.
+        // =====================================================================
+        const checkInInput = document.getElementById('checkIn');
+        const checkOutInput = document.getElementById('checkOut');
+
+        function offsetDate(days) {
+            const date = new Date();
+            date.setDate(date.getDate() + days);
+            return date.toISOString().slice(0, 10);
+        }
+
+        checkInInput.value = offsetDate(1);
+        checkOutInput.value = offsetDate(3);
+
+        // Keep the dates coherent: checkout always follows checkin by at least
+        // one night, so the guest cannot submit an impossible range.
+        checkInInput.addEventListener('change', () => {
+            checkInInput.min = offsetDate(0);
+            if (checkOutInput.value <= checkInInput.value) {
+                const next = new Date(checkInInput.value);
+                next.setDate(next.getDate() + 1);
+                checkOutInput.value = next.toISOString().slice(0, 10);
+            }
+            checkOutInput.min = checkInInput.value;
+        });
+
+        checkOutInput.addEventListener('change', () => {
+            if (checkOutInput.value <= checkInInput.value) {
+                notify.warning('Check-out must be at least one night after check-in.');
+                const next = new Date(checkInInput.value);
+                next.setDate(next.getDate() + 1);
+                checkOutInput.value = next.toISOString().slice(0, 10);
+            }
+        });
+
+        document.getElementById('availability-form').addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const params = new URLSearchParams({
+                checkIn: checkInInput.value,
+                checkOut: checkOutInput.value,
+                guests: document.getElementById('guests').value,
+            });
+
+            window.location.href = `/pages/guest/rooms.html?${params.toString()}`;
+        });
+
+        // =====================================================================
+        // Room types, fetched from the API
+        // =====================================================================
+        const roomTypesGrid = document.getElementById('room-types-grid');
+
+        /**
+         * Illustration per room type.
+         *
+         * A map of complete class names rather than an interpolated one: the
+         * Tailwind CDN cannot see class names generated at runtime, so
+         * `bg-${colour}` would produce no styling at all.
+         */
+        const TYPE_THEMES = {
+            standard: 'from-stone-200 to-stone-100',
+            deluxe: 'from-amber-100 to-stone-100',
+            executive: 'from-blue-100 to-stone-100',
+            suite: 'from-purple-100 to-stone-100',
+            family: 'from-green-100 to-stone-100',
+        };
+
+        const TYPE_IMAGES = {
+            standard: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=900&q=80',
+            deluxe: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=900&q=80',
+            executive: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=900&q=80',
+            suite: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=900&q=80',
+            family: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=900&q=80',
+        };
+
+        function renderRoomTypes(roomTypes) {
+            showSkeleton(roomTypesGrid, 3, 'h-80');
+
+            if (!roomTypes.length) {
+                showEmptyState(roomTypesGrid, {
+                    title: 'No room types available',
+                    message: 'Please check back shortly.',
+                    icon: 'fa-bed',
+                });
+                return;
+            }
+
+            roomTypesGrid.textContent = '';
+
+            for (const type of roomTypes) {
+                const theme = TYPE_THEMES[type.slug] || 'from-stone-200 to-stone-100';
+                const image = TYPE_IMAGES[type.slug] || TYPE_IMAGES.standard;
+
+                const card = document.createElement('article');
+                card.className = 'card card-hover overflow-hidden flex flex-col';
+
+                // ---- Image area, with a fallback if the CDN image fails ----
+                const figure = document.createElement('div');
+                figure.className = `relative h-48 bg-gradient-to-br ${theme}`;
+
+                const img = document.createElement('img');
+                img.src = image;
+                img.alt = `${type.name} at Aurelia Grand Hotel`;
+                img.loading = 'lazy';
+                img.className = 'w-full h-full object-cover';
+                img.addEventListener('error', () => { img.remove(); }, { once: true });
+                figure.appendChild(img);
+
+                const priceBadge = document.createElement('span');
+                priceBadge.className = 'absolute bottom-3 left-3 badge badge-accent';
+                priceBadge.textContent = `${formatMoney(type.fromPrice)} per night`;
+                figure.appendChild(priceBadge);
+
+                // ---- Body ----
+                const body = document.createElement('div');
+                body.className = 'card-body flex-1';
+
+                const heading = document.createElement('h3');
+                heading.className = 'text-lg font-semibold text-stone-900 mb-2';
+                heading.textContent = type.name;
+
+                const description = document.createElement('p');
+                description.className = 'text-sm text-stone-500 leading-relaxed mb-4 line-clamp-3';
+                description.textContent = type.description || '';
+
+                // Facts list. Built from data with text nodes, never innerHTML.
+                const facts = document.createElement('ul');
+                facts.className = 'space-y-1.5 text-sm text-stone-600 mb-4';
+
+                const factItems = [
+                    { icon: 'fa-users', text: `Sleeps up to ${type.maxCapacity}` },
+                    { icon: 'fa-ruler-combined', text: type.sizeSqm ? `${type.sizeSqm} square metres` : 'Spacious layout' },
+                    { icon: 'fa-bed', text: type.bedConfiguration || 'King bed' },
+                    { icon: 'fa-door-open', text: `${type.roomCount} rooms of this type` },
+                ];
+
+                for (const fact of factItems) {
+                    const item = document.createElement('li');
+                    item.className = 'flex items-center gap-2';
+
+                    const icon = document.createElement('i');
+                    icon.className = `fa-solid ${fact.icon} w-4 text-stone-400`;
+                    icon.setAttribute('aria-hidden', 'true');
+
+                    const text = document.createElement('span');
+                    text.textContent = fact.text;
+
+                    item.append(icon, text);
+                    facts.appendChild(item);
+                }
+
+                body.append(heading, description, facts);
+
+                // ---- Footer with the call to action ----
+                const footer = document.createElement('div');
+                footer.className = 'card-footer';
+
+                const link = document.createElement('a');
+                // Carries the type through so the rooms page can preselect it.
+                link.href = `/pages/guest/rooms.html?roomType=${encodeURIComponent(type.slug)}`;
+                link.className = 'btn btn-primary btn-block';
+                link.textContent = 'Check availability';
+
+                footer.appendChild(link);
+                card.append(figure, body, footer);
+                roomTypesGrid.appendChild(card);
+            }
+        }
+
+        try {
+            const result = await roomsApi.roomTypes();
+            renderRoomTypes(result?.data?.roomTypes || []);
+        } catch (error) {
+            showEmptyState(roomTypesGrid, {
+                title: 'Rooms could not be loaded',
+                message: 'Check your connection and refresh the page.',
+                icon: 'fa-triangle-exclamation',
+            });
+        }
+
+        // =====================================================================
+        // Reviews, fetched from the API
+        // =====================================================================
+        const reviewsContainer = document.getElementById('reviews-container');
+
+        /** Renders five star icons for an integer rating. */
+        function starIcons(rating) {
+            const wrap = document.createElement('div');
+            wrap.className = 'flex gap-0.5 mb-3';
+            wrap.setAttribute('aria-label', `${rating} out of 5 stars`);
+
+            for (let i = 1; i <= 5; i += 1) {
+                const star = document.createElement('i');
+                star.className = i <= rating ? 'fa-solid fa-star text-amber-500 text-xs' : 'fa-regular fa-star text-stone-300 text-xs';
+                star.setAttribute('aria-hidden', 'true');
+                wrap.appendChild(star);
+            }
+            return wrap;
+        }
+
+        function renderReviews(reviews, average) {
+            if (!reviews.length) {
+                showEmptyState(reviewsContainer, {
+                    title: 'No reviews yet',
+                    message: 'Be the first to share your experience.',
+                    icon: 'fa-star',
+                });
+                return;
+            }
+
+            reviewsContainer.textContent = '';
+
+            for (const review of reviews) {
+                const card = document.createElement('article');
+                card.className = 'card card-hover p-6 flex flex-col';
+
+                card.appendChild(starIcons(review.rating));
+
+                const title = document.createElement('h3');
+                title.className = 'font-semibold text-stone-900 mb-2';
+                title.textContent = review.title;
+
+                const comment = document.createElement('p');
+                comment.className = 'text-sm text-stone-600 leading-relaxed mb-4 flex-1 line-clamp-4';
+                comment.textContent = review.comment;
+
+                const byline = document.createElement('div');
+                byline.className = 'flex items-center justify-between gap-3 pt-3 border-t border-stone-100';
+
+                const name = document.createElement('span');
+                name.className = 'text-xs font-medium text-stone-700';
+                name.textContent = review.userName || 'Verified guest';
+
+                const date = document.createElement('span');
+                date.className = 'text-xs text-stone-400';
+                date.textContent = review.createdAt
+                    ? new Date(review.createdAt).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })
+                    : '';
+
+                byline.append(name, date);
+                card.append(title, comment, byline);
+                reviewsContainer.appendChild(card);
+            }
+        }
+
+        try {
+            // Only show reviews that are visible and for the hotel itself.
+            const result = await api.get('/reviews', { query: { entityType: 'hotel', limit: 3 } });
+            renderReviews(result?.data?.reviews || [], result?.data?.averageRating);
+        } catch (error) {
+            showEmptyState(reviewsContainer, {
+                title: 'Reviews could not be loaded',
+                message: 'Please refresh to try again.',
+                icon: 'fa-triangle-exclamation',
+            });
+        }
+
+        // =====================================================================
+        // Contact form
+        // Posts a real message to the chat endpoint. If the visitor is not
+        // signed in they are sent to sign in first, rather than the form
+        // silently failing.
+        // =====================================================================
+        const contactForm = document.getElementById('contact-form');
+        const contactAlert = document.getElementById('contact-alert');
+        const contactSubmit = document.getElementById('contact-submit');
+
+        contactForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            contactAlert.classList.add('hidden');
+
+            const name = document.getElementById('contact-name').value.trim();
+            const email = document.getElementById('contact-email').value.trim();
+            const message = document.getElementById('contact-message').value.trim();
+
+            if (!name || !email || !message) {
+                showAlert(contactAlert, 'Please complete all three fields.', 'error');
+                return;
+            }
+
+            setButtonLoading(contactSubmit, true, 'Sending...');
+
+            try {
+                await api.post('/chat/conversations', {
+                    subject: 'Website enquiry',
+                    context_type: 'support',
+                    first_message: message,
+                });
+
+                contactForm.reset();
+                notify.success('Message sent. Reception will reply shortly.');
+            } catch (error) {
+                if (error.status === 401) {
+                    notify.info('Please sign in so we can reply to you.');
+                    window.location.href = '/pages/auth/login.html?returnTo=' + encodeURIComponent('/#contact');
+                    return;
+                }
+                showAlert(contactAlert, error.message, 'error');
+            } finally {
+                setButtonLoading(contactSubmit, false);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -49,21 +49,68 @@ export function createApp() {
     // 1. Security headers.
     app.use(
         helmet({
-            // The frontend loads Tailwind and icon fonts from CDNs, so the
-            // default same-origin policy would block them.
+            /**
+             * The Content Security Policy is configured explicitly rather than
+             * left at the Helmet default, because the frontend legitimately
+             * loads from several CDNs.
+             *
+             * WHY 'unsafe-inline' APPEARS HERE FOR SCRIPTS
+             * Each page has a small inline `<script type="module">` block that
+             * wires up that specific page. A strict policy without
+             * 'unsafe-inline' blocks those blocks entirely, and without them no
+             * page in the application works at all: no header, no data loading,
+             * no forms.
+             *
+             * This is a real trade-off and worth being explicit about.
+             * 'unsafe-inline' in script-src weakens the protection XSS
+             * provides, so it should not be treated as free. The mitigations
+             * that make it acceptable here are:
+             *   - all page logic lives in separate .js modules served from
+             *     this origin, where CSP still applies normally,
+             *   - API data is inserted with textContent or escaped before it
+             *     reaches the DOM, so a stored XSS payload cannot execute even
+             *     if it were injected,
+             *   - no third-party script other than the Tailwind CDN is loaded.
+             *
+             * The correct fix is to move every inline block into its own
+             * external module file and drop 'unsafe-inline'. That is a
+             * mechanical follow-up; until then the policy is deliberately
+             * permissive for scripts and strict everywhere else.
+             *
+             * 'unsafe-eval' is required by the Tailwind CDN, which compiles
+             * classes at runtime using Function(). It does not apply to the
+             * production build path.
+             */
             contentSecurityPolicy: {
                 directives: {
                     defaultSrc: ["'self'"],
-                    scriptSrc: ["'self'", 'https://cdn.tailwindcss.com', "'unsafe-eval'"],
-                    styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com'],
+                    scriptSrc: [
+                        "'self'",
+                        'https://cdn.tailwindcss.com',
+                        "'unsafe-inline'",
+                        "'unsafe-eval'",
+                    ],
+                    styleSrc: [
+                        "'self'",
+                        "'unsafe-inline'",
+                        'https://fonts.googleapis.com',
+                        'https://cdnjs.cloudflare.com',
+                    ],
                     fontSrc: ["'self'", 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com', 'data:'],
                     imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
                     connectSrc: ["'self'"],
+                    // Stops a page being framed, which enables clickjacking.
+                    frameAncestors: ["'none'"],
+                    objectSrc: ["'none'"],
+                    baseUri: ["'self'"],
+                    formAction: ["'self'"],
                 },
             },
             // Uploaded images are served by a controller rather than statically,
             // so cross-origin resource sharing is not needed here.
             crossOriginEmbedderPolicy: false,
+            // Allows the page to be loaded from a CDN origin over HTTPS.
+            crossOriginResourcePolicy: { policy: 'cross-origin' },
         }),
     );
 

@@ -35,9 +35,24 @@ export const pool = mysql.createPool({
     queueLimit: 0,
     namedPlaceholders: true,
     charset: 'utf8mb4_unicode_ci',
-    // Return DATE/DATETIME columns as JS Date objects in local time.
-    dateStrings: false,
-    timezone: 'local',
+    /**
+     * DATE and DATETIME columns are returned as 'YYYY-MM-DD' and
+     * 'YYYY-MM-DD HH:MM:SS' strings instead of JavaScript Date objects.
+     *
+     * WHY THIS MATTERS
+     * A booking check-in date is a calendar date, not an instant in time. If
+     * mysql2 returns it as a Date, the driver interprets it in the session
+     * timezone and then converts it to UTC, so a guest checking in on the
+     * 11th can be shown the 10th in any timezone offset behind UTC. The date
+     * silently shifts, which is exactly the class of bug that produces
+     * "wrong night" complaints at the front desk.
+     *
+     * Keeping the raw string means the value returned by the database is the
+     * value the application works with. Callers that need a Date use the
+     * date helpers in src/utils/date.js, which parse in local time
+     * deliberately.
+     */
+    dateStrings: true,
 });
 
 /**

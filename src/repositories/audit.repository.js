@@ -18,6 +18,7 @@
  * Database tables used: audit_logs, users (for email lookup on failed login).
  */
 import { query, queryOne, execute } from '../config/db.js';
+import { parseJsonColumn } from '../utils/json.js';
 import { resolvePagination } from './base.repository.js';
 
 const auditRepository = {
@@ -127,15 +128,9 @@ const auditRepository = {
 };
 
 function mapAuditRow(row) {
-    let metadata = null;
-    if (row.metadata) {
-        // mysql2 may return JSON columns as a string or already parsed.
-        try {
-            metadata = typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata;
-        } catch {
-            metadata = null;
-        }
-    }
+    // Shared helper: mysql2 may return a JSON column already parsed or as a
+    // string, and parsing an already-parsed value would throw.
+    const metadata = parseJsonColumn(row.metadata, null);
     return {
         id: row.id,
         userId: row.user_id,

@@ -23,6 +23,8 @@ import { Router } from 'express';
 import authRoutes from './auth.routes.js';
 import userRoutes from './users.routes.js';
 import adminRoutes from './admin.routes.js';
+import roomRoutes from './rooms.routes.js';
+import bookingRoutes from './bookings.routes.js';
 
 const router = Router();
 
@@ -44,6 +46,8 @@ router.get('/health', async (req, res) => {
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
+router.use('/rooms', roomRoutes);
+router.use('/bookings', bookingRoutes);
 
 // Mounted without a role guard here on purpose: the guard lives inside
 // admin.routes.js as `router.use(requireRole('admin'))`, so every route added

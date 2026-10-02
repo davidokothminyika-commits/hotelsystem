@@ -155,6 +155,46 @@ export async function cleanupTables(tables) {
 }
 
 /**
+ * Deletes bookings that a previous test run left behind.
+ *
+ * WHY THIS IS NEEDED
+ * Booking tests deliberately consume rooms for future dates. Running the
+ * suite repeatedly against the same database would slowly fill every room
+ * until no room is free and the suite fails for reasons unrelated to the code
+ * under test.
+ *
+ * Only bookings with the automated test marker are removed, so real data and
+ * the seeded sample bookings are never touched. `special_requests` is used as
+ * the marker because it is written by every booking the tests create.
+ *
+ * @param {number} [olderThanHours] Safety window: only clean rows at least
+ *   this old, so a concurrently running suite is never disturbed.
+ */
+export async function cleanTestBookings(olderThanHours = 0) {
+    await execute(
+        `DELETE FROM bookings
+         WHERE special_requests = 'Automated test booking'
+           AND created_at < DATE_SUB(NOW(), INTERVAL :hours HOUR)`,
+        { hours: olderThanHours },
+    );
+}
+
+/**
+ * Resets room status so a failed run cannot leave rooms stuck in a state that
+ * excludes them from availability searches.
+ */
+export async function resetRoomStatuses() {
+    await execute(
+        `UPDATE rooms r SET r.status = 'available'
+         WHERE r.status IN ('cleaning', 'maintenance')
+           AND NOT EXISTS (
+               SELECT 1 FROM bookings b
+               WHERE b.room_id = r.id AND b.status = 'checked_in'
+           )`,
+    );
+}
+
+/**
  * Runs a SELECT and returns rows.
  *
  * Tests need this because `execute` returns a driver result object while

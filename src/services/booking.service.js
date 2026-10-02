@@ -227,8 +227,9 @@ const bookingService = {
 
     /** Lists bookings, scoped to the requesting user when they are a guest. */
     async listBookings({ userId, role, page, limit, status, search, sortBy, sortDir, checkInFrom, checkInTo }) {
-        // A guest may only ever list their own bookings. Staff list all.
-        const scopeUserId = role === 'guest' ? userId : userId;
+        // A guest may only ever list their own bookings. Staff list all, which
+        // is what the reception and admin dashboards rely on.
+        const scopeUserId = role === 'guest' ? userId : undefined;
         return bookingRepository.findMany({
             page,
             limit,

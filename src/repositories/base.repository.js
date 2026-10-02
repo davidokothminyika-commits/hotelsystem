@@ -75,6 +75,35 @@ export function resolveSort(sortBy, sortDir, allowedColumns, fallback, defaultDi
 }
 
 /**
+ * Builds a placeholder list for an IN clause.
+ *
+ * WHY THIS IS NEEDED
+ * mysql2 sends prepared statements to the server with the placeholder syntax
+ * intact, so `WHERE id IN (:ids)` with an array value does not expand into a
+ * list. It either fails or silently matches nothing, which is why a query can
+ * look correct and return zero rows.
+ *
+ * The placeholders are generated here and every value is still passed as a
+ * bound parameter, so this does not weaken parameterisation. Only the number
+ * of placeholders is derived from the array length, never its contents.
+ *
+ * @param {Array<any>} values
+ * @param {string} [prefix='val'] Prefix for the generated parameter names.
+ * @returns {{ placeholders: string, params: object }}
+ *
+ * @example
+ *   const { placeholders, params } = buildInClause([3, 7, 11]);
+ *   // placeholders: ':val0, :val7, :val11'
+ *   await query(`SELECT * FROM rooms WHERE id IN (${placeholders})`, params);
+ */
+export function buildInClause(values, prefix = 'val') {
+    const list = Array.isArray(values) ? values : [values];
+    const placeholders = list.map((_, index) => `:${prefix}${index}`).join(', ');
+    const params = Object.fromEntries(list.map((value, index) => [`${prefix}${index}`, value]));
+    return { placeholders, params };
+}
+
+/**
  * Common repository behaviour shared by every table.
  * Concrete repositories extend this and expose intent named methods such as
  * `findByEmail` rather than a generic `findOne`, so controllers read clearly.

@@ -14,6 +14,7 @@
  * Database tables used: roles, permissions, role_permissions, users.
  */
 import { query, queryOne, execute } from '../config/db.js';
+import { buildInClause } from './base.repository.js';
 
 /** Permission codes defined by the seed, grouped for readability in the UI. */
 export const PERMISSION_CATALOG = Object.freeze({
@@ -162,10 +163,12 @@ const permissionRepository = {
      * permissions at all (which would silently lock staff out).
      */
     async setRolePermissions(roleId, permissionCodes) {
+        // Placeholders are generated from the count; the codes themselves are
+        // still bound parameters, so an unknown code can never reach the SQL.
+        const { placeholders, params } = buildInClause(permissionCodes, 'code');
+
         const permissions = permissionCodes.length
-            ? await query('SELECT id, code FROM permissions WHERE code IN (:codes)', {
-                  codes: permissionCodes,
-              })
+            ? await query(`SELECT id, code FROM permissions WHERE code IN (${placeholders})`, params)
             : [];
 
         const found = permissions.map((p) => p.code);

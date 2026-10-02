@@ -362,6 +362,40 @@ const bookingRepository = {
     },
 
     /**
+     * Finds the guest's current stay in a room.
+     *
+     * Used by room delivery, which must only be offered when the guest is
+     * genuinely in that room. Two cases qualify:
+     *   - the booking is checked in, or
+     *   - the booking is confirmed or pending and today falls within the stay
+     *     window, so a guest can order on arrival day before reception has
+     *     finished check-in.
+     *
+     * @param {number} userId
+     * @param {number} roomId
+     * @returns {Promise<object|null>}
+     */
+    async findActiveStayForRoom(userId, roomId) {
+        const row = await queryOne(
+            `SELECT b.*, r.room_number, rt.name AS room_type
+             FROM bookings b
+             JOIN rooms r ON r.id = b.room_id
+             JOIN room_types rt ON rt.id = r.room_type_id
+             WHERE b.user_id = :userId
+               AND b.room_id = :roomId
+               AND (
+                    b.status = 'checked_in'
+                    OR (b.status IN ('confirmed', 'pending') AND b.check_in <= CURDATE() AND b.check_out > CURDATE())
+               )
+             ORDER BY FIELD(b.status, 'checked_in', 'confirmed', 'pending') ASC, b.check_in DESC
+             LIMIT 1`,
+            { userId, roomId },
+        );
+
+        return mapBooking(row);
+    },
+
+    /**
      * Bookings arriving or departing today, for the reception dashboard.
      */
     async getTodayArrivals() {

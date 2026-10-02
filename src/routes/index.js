@@ -25,6 +25,8 @@ import userRoutes from './users.routes.js';
 import adminRoutes from './admin.routes.js';
 import roomRoutes from './rooms.routes.js';
 import bookingRoutes from './bookings.routes.js';
+import menuRoutes from './menu.routes.js';
+import orderRoutes from './orders.routes.js';
 
 const router = Router();
 
@@ -48,6 +50,8 @@ router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/rooms', roomRoutes);
 router.use('/bookings', bookingRoutes);
+router.use('/menu', menuRoutes);
+router.use('/orders', orderRoutes);
 
 // Mounted without a role guard here on purpose: the guard lives inside
 // admin.routes.js as `router.use(requireRole('admin'))`, so every route added

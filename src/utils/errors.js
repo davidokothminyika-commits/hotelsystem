@@ -51,6 +51,18 @@ export class ApiError extends Error {
         return new ApiError(message, 409, code);
     }
 
+    /**
+     * Payment required (HTTP 402).
+     *
+     * A declined card is not a validation error: the request was well formed
+     * and the user may retry it. Giving it its own status lets the frontend
+     * show the gateway's message and keep the card form filled in, instead of
+     * treating it as a broken submission.
+     */
+    static paymentRequired(message = 'Payment could not be completed', code = 'PAYMENT_FAILED', details) {
+        return new ApiError(message, 402, code, details);
+    }
+
     static unprocessable(message = 'Validation failed', details) {
         return new ApiError(message, 422, 'VALIDATION_ERROR', details);
     }

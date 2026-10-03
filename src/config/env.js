@@ -93,6 +93,10 @@ export const env = Object.freeze({
     appUrl: read('APP_URL', 'http://localhost:5000'),
     appName: read('APP_NAME', 'Aurelia Grand Hotel'),
 
+    // Selects the payment provider. Kept as configuration so a real gateway
+    // is a .env change rather than a code change.
+    paymentProvider: read('PAYMENT_PROVIDER', 'mock'),
+
     db: Object.freeze({
         host: read('DB_HOST', 'localhost'),
         port: readInt('DB_PORT', 3306),

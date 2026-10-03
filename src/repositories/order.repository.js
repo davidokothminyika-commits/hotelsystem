@@ -14,7 +14,7 @@
  * Database tables used: orders, order_items, menu_items, users, rooms, bookings
  * Frontend access: /api/orders
  */
-import { query, queryOne } from '../config/db.js';
+import { query, queryOne, execute } from '../config/db.js';
 import { resolvePagination, resolveSort } from './base.repository.js';
 
 /**
@@ -255,7 +255,7 @@ const orderRepository = {
         if (connection) {
             await connection.execute(sql, { id, amount });
         } else {
-            await queryOne(sql, { id, amount });
+            await execute(sql, { id, amount });
         }
     },
 

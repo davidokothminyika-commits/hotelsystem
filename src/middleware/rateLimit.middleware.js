@@ -130,5 +130,30 @@ export const writeLimiter = rateLimit({
         sendError(res, 'You are making requests too quickly. Please slow down.', 'WRITE_RATE_LIMITED', 429),
 });
 
+/**
+ * Payment limiter. Deliberately tighter than writeLimiter.
+ *
+ * Card testing works by firing many small charges from one place and looking
+ * for a response that distinguishes a live card from a dead one. A low ceiling
+ * makes that impractical, and it also stops a double-submitting bug from
+ * turning into several charges.
+ */
+export const paymentLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: env.isTest ? Number.MAX_SAFE_INTEGER : 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    // Only count attempts that actually reach the gateway. A card rejected by
+    // validation never cost anything, so retrying it should not be punished.
+    skipSuccessfulRequests: true,
+    handler: (_req, res) =>
+        sendError(
+            res,
+            'Too many payment attempts. Wait a moment before trying again.',
+            'PAYMENT_RATE_LIMITED',
+            429,
+        ),
+});
+
 export { ApiError };
-export default { apiLimiter, authLimiter, emailLimiter, writeLimiter };
+export default { apiLimiter, authLimiter, emailLimiter, writeLimiter, paymentLimiter };

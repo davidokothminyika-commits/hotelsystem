@@ -27,6 +27,8 @@ import roomRoutes from './rooms.routes.js';
 import bookingRoutes from './bookings.routes.js';
 import menuRoutes from './menu.routes.js';
 import orderRoutes from './orders.routes.js';
+import paymentRoutes from './payments.routes.js';
+import invoiceRoutes from './invoices.routes.js';
 
 const router = Router();
 
@@ -52,6 +54,11 @@ router.use('/rooms', roomRoutes);
 router.use('/bookings', bookingRoutes);
 router.use('/menu', menuRoutes);
 router.use('/orders', orderRoutes);
+router.use('/payments', paymentRoutes);
+// The invoice endpoints are declared inside payments.routes.js but are
+// addressed as their own resource (`/api/invoices/...`), so they need their
+// own mount. Without it every invoice and receipt URL 404s.
+router.use('/invoices', invoiceRoutes);
 
 // Mounted without a role guard here on purpose: the guard lives inside
 // admin.routes.js as `router.use(requireRole('admin'))`, so every route added

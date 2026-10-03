@@ -29,6 +29,9 @@ import menuRoutes from './menu.routes.js';
 import orderRoutes from './orders.routes.js';
 import paymentRoutes from './payments.routes.js';
 import invoiceRoutes from './invoices.routes.js';
+import reviewRoutes from './reviews.routes.js';
+import messageRoutes from './messages.routes.js';
+import notificationRoutes from './notifications.routes.js';
 
 const router = Router();
 
@@ -59,6 +62,9 @@ router.use('/payments', paymentRoutes);
 // addressed as their own resource (`/api/invoices/...`), so they need their
 // own mount. Without it every invoice and receipt URL 404s.
 router.use('/invoices', invoiceRoutes);
+router.use('/reviews', reviewRoutes);
+router.use('/messages', messageRoutes);
+router.use('/notifications', notificationRoutes);
 
 // Mounted without a role guard here on purpose: the guard lives inside
 // admin.routes.js as `router.use(requireRole('admin'))`, so every route added

@@ -25,9 +25,23 @@ import {
     loginAs,
     select,
     closePool,
+    cleanTestBookings,
+    resetRoomStatuses,
+    testBookingMarker,
 } from './helpers/test-server.js';
 
+// Unique to this run, so the startup cleanup reclaims earlier runs' bookings
+// without touching rows the other suites are using right now.
+const RUN_MARKER = testBookingMarker();
+
 before(async () => {
+    // The delivery test below books a real room for tonight, so this suite has
+    // to reclaim what previous runs left behind for the same reason the booking
+    // suite does. Without it every run blocks the highest numbered free room
+    // for a near-term window, and after enough runs the capacity 5 rooms are
+    // all booked, which breaks an unrelated suite's availability assertions.
+    await cleanTestBookings(RUN_MARKER);
+    await resetRoomStatuses();
     await startTestServer();
 });
 
@@ -405,6 +419,10 @@ describe('Order placement', () => {
             checkIn: today,
             checkOut: later,
             guests: 2,
+            // The marker the shared cleanup looks for. Without it this booking
+            // is indistinguishable from real data, so it is never reclaimed
+            // and the room stays blocked for tonight on every later run.
+            specialRequests: RUN_MARKER,
         });
         assert.equal(booking.status, 201);
 

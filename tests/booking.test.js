@@ -28,13 +28,18 @@ import {
     closePool,
     cleanTestBookings,
     resetRoomStatuses,
+    testBookingMarker,
 } from './helpers/test-server.js';
+
+// Unique to this run, so the startup cleanup reclaims every earlier run's
+// bookings without touching the ones the other suites are creating right now.
+const RUN_MARKER = testBookingMarker();
 
 before(async () => {
     // Booking tests consume rooms for future dates. Clearing rows left by an
     // earlier run keeps the suite repeatable instead of slowly exhausting the
     // inventory, and restores any rooms left mid-cleaning by a failed run.
-    await cleanTestBookings();
+    await cleanTestBookings(RUN_MARKER);
     await resetRoomStatuses();
     await startTestServer();
 });
@@ -54,7 +59,7 @@ async function bookRoom(client, { roomId, checkIn, checkOut, guests = 2 }) {
         checkIn,
         checkOut,
         guests,
-        specialRequests: 'Automated test booking',
+        specialRequests: RUN_MARKER,
     });
 }
 

@@ -19,6 +19,8 @@
 // Must be the first import so NODE_ENV is set before env.js is evaluated.
 import './env-setup.js';
 
+import { randomUUID } from 'node:crypto';
+
 import { createApp } from '../../src/app.js';
 import { closePool, query, execute } from '../../src/config/db.js';
 
@@ -155,38 +157,73 @@ export async function cleanupTables(tables) {
 }
 
 /**
- * Deletes bookings that a previous test run left behind.
+ * The prefix every automated test booking carries in `special_requests`.
  *
- * WHY THIS IS NEEDED
- * Booking tests deliberately consume rooms for future dates. Running the
- * suite repeatedly against the same database would slowly fill every room
- * until no room is free and the suite fails for reasons unrelated to the code
- * under test.
- *
- * Only bookings with the automated test marker are removed, so real data and
- * the seeded sample bookings are never touched. `special_requests` is used as
- * the marker because it is written by every booking the tests create.
- *
- * @param {number} [olderThanHours] Safety window: only clean rows at least
- *   this old, so a concurrently running suite is never disturbed.
+ * It has to be a prefix rather than the whole value so a per-run id can be
+ * appended. Only rows carrying this prefix are ever deleted, so real data and
+ * the seeded sample bookings are never touched.
  */
-export async function cleanTestBookings(olderThanHours = 0) {
+export const TEST_BOOKING_PREFIX = 'Automated test booking';
+
+/**
+ * Builds the marker for one run, so its bookings can be told apart from every
+ * other run's.
+ *
+ * @param {string} [runId] Defaults to a value unique to this process.
+ */
+export function testBookingMarker(runId = randomUUID()) {
+    return `${TEST_BOOKING_PREFIX} [${runId}]`;
+}
+
+/**
+ * Deletes the bookings left by every test run except this one.
+ *
+ * WHY RUN IDS RATHER THAN A TIMESTAMP OR "DELETE EVERYTHING"
+ * `node --test tests/*.test.js` runs the files in parallel against one
+ * database, and every suite that books rooms calls this at startup. Two
+ * earlier attempts at this were wrong in opposite directions:
+ *
+ *   - Delete every marked row: one suite removes rows another suite created
+ *     moments earlier and is still using. The failure surfaces as "no free
+ *     room" on whichever test happened to be creating a booking.
+ *   - Delete only rows older than a cutoff: back-to-back runs land inside the
+ *     same second, so the previous run's bookings survive and still block the
+ *     rooms. This failed consistently rather than intermittently.
+ *
+ * A unique marker per run removes every earlier run's rows whatever their age,
+ * and cannot touch a concurrently running suite because its id differs.
+ *
+ * @param {string} keepMarker The marker this run writes.
+ */
+export async function cleanTestBookings(keepMarker) {
     await execute(
         `DELETE FROM bookings
-         WHERE special_requests = 'Automated test booking'
-           AND created_at < DATE_SUB(NOW(), INTERVAL :hours HOUR)`,
-        { hours: olderThanHours },
+         WHERE special_requests LIKE :prefix
+           AND special_requests <> :keep`,
+        { prefix: `${TEST_BOOKING_PREFIX}%`, keep: keepMarker },
     );
 }
 
 /**
- * Resets room status so a failed run cannot leave rooms stuck in a state that
- * excludes them from availability searches.
+ * Returns rooms to the pool that no live booking is holding.
+ *
+ * WHY THE RULE IS "NO CHECKED IN BOOKING" RATHER THAN A LIST OF STATES
+ * A room is only legitimately `occupied` while a guest is actually checked in.
+ * Every other status is recoverable, so the query inverts the condition and
+ * clears anything a run left behind.
+ *
+ * An earlier version listed the states to reset, `('cleaning',
+ * 'maintenance')`, and omitted `occupied`. A run that died between check-in and
+ * checkout therefore left rooms flagged occupied with nothing holding them, and
+ * they stayed that way forever: every later run found an empty inventory and
+ * failed with "seeded data should provide available rooms", which reads like a
+ * seeding problem rather than leftover state. Deriving the rule from the
+ * booking that justifies the status cannot miss a case.
  */
 export async function resetRoomStatuses() {
     await execute(
         `UPDATE rooms r SET r.status = 'available'
-         WHERE r.status IN ('cleaning', 'maintenance')
+         WHERE r.status <> 'available'
            AND NOT EXISTS (
                SELECT 1 FROM bookings b
                WHERE b.room_id = r.id AND b.status = 'checked_in'

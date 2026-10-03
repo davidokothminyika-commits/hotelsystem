@@ -32,6 +32,7 @@ import invoiceRoutes from './invoices.routes.js';
 import reviewRoutes from './reviews.routes.js';
 import messageRoutes from './messages.routes.js';
 import notificationRoutes from './notifications.routes.js';
+import auditRoutes from './audit.routes.js';
 
 const router = Router();
 
@@ -65,6 +66,8 @@ router.use('/invoices', invoiceRoutes);
 router.use('/reviews', reviewRoutes);
 router.use('/messages', messageRoutes);
 router.use('/notifications', notificationRoutes);
+// Mounted with the admin-only guard inside audit.routes.js itself.
+router.use('/audit-logs', auditRoutes);
 
 // Mounted without a role guard here on purpose: the guard lives inside
 // admin.routes.js as `router.use(requireRole('admin'))`, so every route added

@@ -197,7 +197,12 @@ const roomRepository = {
         const conditions = [];
         const params = { limit: pagination.limit, offset: pagination.offset };
 
-        if (!includeInactive) conditions.push('r.is_active = 1');
+        // Every entry is an object with `sql` and optional `params`. Pushing a
+        // bare string here once produced `WHERE  AND ...`, because the join
+        // below reads c.sql.
+        if (!includeInactive) {
+            conditions.push({ sql: 'r.is_active = 1', params: {} });
+        }
 
         if (search) {
             conditions.push({

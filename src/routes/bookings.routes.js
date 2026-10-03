@@ -33,13 +33,15 @@ import bookingController from '../controllers/booking.controller.js';
 
 const router = Router();
 
+// Everything below requires a session. This is declared before the first route
+// because requireStaff reads req.user, which only requireAuth sets: declared
+// afterwards it would always see an undefined user and reject staff with 401.
+router.use(requireAuth);
+
 // Literal paths before '/:id'.
-router.get('/summary', requireAuth, bookingController.summary);
+router.get('/summary', bookingController.summary);
 router.get('/front-desk', requireStaff, bookingController.frontDesk);
 router.get('/counts', requireStaff, bookingController.counts);
-
-// Everything else requires a session.
-router.use(requireAuth);
 
 router.get('/', validate(listBookingsRules), bookingController.list);
 

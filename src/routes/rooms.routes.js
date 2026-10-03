@@ -40,7 +40,13 @@ const router = Router();
 router.get('/availability', validate(availabilityRules), roomController.availability);
 router.get('/types', roomController.types);
 router.get('/amenities', roomController.amenities);
-router.get('/status-counts', requireStaff, roomController.statusCounts);
+
+// Declared here, before '/:id', so it is not captured as an identifier. It
+// carries its own auth rather than relying on a router.use further down:
+// requireStaff reads req.user, which only requireAuth sets, and a guard placed
+// before authentication rejects staff with a 401 that looks like a bad
+// password. See the equivalent note in orders.routes.js.
+router.get('/status-counts', requireAuth, requireStaff, roomController.statusCounts);
 
 router.get('/', validate(roomListRules), roomController.list);
 router.get('/:id', validate(idParamRules), roomController.detail);
@@ -49,6 +55,11 @@ router.get('/:id/calendar', validate(idParamRules), roomController.calendar);
 // ---------------------------------------------------------------------------
 // Staff: operational room management
 // ---------------------------------------------------------------------------
+
+// Every route below reads req.user through requireStaff or requireRole, so a
+// session is required from here down. Declaring it once removes the chance of a
+// future route being added above this line and silently failing its guard.
+router.use(requireAuth);
 
 router.patch(
     '/:id/status',

@@ -42,9 +42,12 @@ const router = Router();
 // them to staff browsing the same page.
 router.get('/categories', optionalAuth, menuController.categories);
 
-// Literal paths before '/:id'.
-router.get('/stats', requireStaff, menuController.stats);
-router.get('/popular', requireStaff, menuController.popular);
+// Staff reporting, declared before '/:id' so it is not captured as an
+// identifier. It carries its own auth: requireStaff reads req.user, which only
+// requireAuth sets, so a guard placed ahead of authentication rejects every
+// staff member with a 401 that reads like a bad password.
+router.get('/stats', requireAuth, requireStaff, menuController.stats);
+router.get('/popular', requireAuth, requireStaff, menuController.popular);
 
 router.get('/', optionalAuth, validate(browseMenuRules), menuController.browse);
 

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages | Aurelia Grand Hotel</title>
+    <meta name="robots" content="noindex">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/css/app.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="h-full bg-stone-50">
+    <a href="#page-content" class="skip-link">Skip to main content</a>
+
+    <div id="app-sidebar"></div>
+    <div id="sidebar-overlay"></div>
+    <div id="app-root"></div>
+    <div id="app-header"></div>
+    <div id="modal-root-slot"></div>
+
+    <!-- The same inbox serves staff and admin: an administrator answers the
+         same queue a receptionist does, only with wider access. The role guard
+         lives in the script, which resolves it from the signed-in user. -->
+    <script type="module" src="/js/pages/staff/messages.js"></script>
+</body>
+</html>

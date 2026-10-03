@@ -400,7 +400,11 @@ export function menuItemCard(item, onAdd) {
     // Flags for dietary information, which guests filter by.
     const flags = document.createElement('div');
     flags.className = 'absolute top-2 left-2 flex gap-1.5 flex-wrap';
-    if (item.is_vegetarian) {
+    // Field names here are camelCase because that is what the API returns.
+    // These were previously snake_case, which silently disabled every check
+    // below: the sold-out badge never appeared and the "Sold out" button was
+    // never applied, so a guest could add an unavailable dish to their order.
+    if (item.isVeg) {
         flags.appendChild(
             createElement('span', {
                 class: 'badge badge-success',
@@ -409,7 +413,7 @@ export function menuItemCard(item, onAdd) {
             }),
         );
     }
-    if (item.is_spicy) {
+    if (item.isSpicy) {
         flags.appendChild(
             createElement('span', {
                 class: 'badge badge-danger',
@@ -418,7 +422,7 @@ export function menuItemCard(item, onAdd) {
             }),
         );
     }
-    if (!item.is_available) {
+    if (!item.isAvailable) {
         flags.appendChild(createElement('span', { class: 'badge badge-neutral', text: 'Sold out' }));
     }
     figure.appendChild(flags);
@@ -435,8 +439,8 @@ export function menuItemCard(item, onAdd) {
     );
     body.appendChild(titleRow);
 
-    if (item.category_name) {
-        body.appendChild(createElement('p', { class: 'text-xs text-stone-400', text: item.category_name }));
+    if (item.categoryName) {
+        body.appendChild(createElement('p', { class: 'text-xs text-stone-400', text: item.categoryName }));
     }
 
     if (item.description) {
@@ -445,11 +449,11 @@ export function menuItemCard(item, onAdd) {
         );
     }
 
-    if (item.prep_minutes) {
+    if (item.prepMinutes) {
         body.appendChild(
             createElement('p', {
                 class: 'text-xs text-stone-400 mt-2 flex items-center gap-1.5',
-                text: `Prepared in about ${item.prep_minutes} minutes`,
+                text: `Prepared in about ${item.prepMinutes} minutes`,
             }),
         );
     }
@@ -466,7 +470,7 @@ export function menuItemCard(item, onAdd) {
     });
     button.prepend(createElement('i', { class: 'fa-solid fa-plus mr-2', 'aria-hidden': 'true' }));
 
-    if (!item.is_available) {
+    if (!item.isAvailable) {
         button.disabled = true;
         button.textContent = 'Sold out';
     } else if (onAdd) {
@@ -506,12 +510,12 @@ export function reviewCard(review, { showEntity = false } = {}) {
     card.appendChild(createElement('p', { class: 'text-sm text-stone-600 leading-relaxed flex-1', text: review.comment }));
 
     // ---- Management reply ----
-    if (review.staff_reply) {
+    if (review.staffReply) {
         const reply = createElement('div', { class: 'mt-3 pl-3 border-l-2 border-amber-400 bg-amber-50/50 rounded-r p-3' });
         reply.appendChild(
             createElement('p', { class: 'text-xs font-semibold text-amber-800 mb-1', text: 'Response from Aurelia Grand' }),
         );
-        reply.appendChild(createElement('p', { class: 'text-xs text-stone-600', text: review.staff_reply }));
+        reply.appendChild(createElement('p', { class: 'text-xs text-stone-600', text: review.staffReply }));
         card.appendChild(reply);
     }
 
@@ -523,11 +527,11 @@ export function reviewCard(review, { showEntity = false } = {}) {
         createElement('span', { class: 'font-medium text-stone-600', text: review.userName || 'Verified guest' }),
     );
 
-    if (showEntity && review.entity_type) {
+    if (showEntity && review.entityType) {
         byline.appendChild(
             createElement('span', {
                 class: 'capitalize',
-                text: review.entity_type.replace('_', ' '),
+                text: review.entityType.replace('_', ' '),
             }),
         );
     }

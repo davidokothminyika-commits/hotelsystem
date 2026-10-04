@@ -17,7 +17,7 @@
     <div class="min-h-full lg:grid lg:grid-cols-2">
 
         <div class="flex flex-col justify-center px-6 py-12 sm:px-12">
-            <div class="mx-auto w-full max-w-md">
+            <div class="mx-auto w-full max-w-md" data-reveal>
 
                 <a href="/" class="inline-flex items-center gap-2.5 mb-8">
                     <span class="flex items-center justify-center w-10 h-10 rounded-lg bg-amber-600 text-stone-900">
@@ -134,13 +134,13 @@
             </div>
         </div>
 
-        <div class="hidden lg:block relative bg-stone-900">
-            <img src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=1600&q=80"
+        <div class="hidden lg:block relative bg-stone-900" data-reveal="fade">
+            <img src="/assets/images/site/auth-register.jpg"
                  alt="A bright hotel room with warm neutral tones"
                  class="absolute inset-0 w-full h-full object-cover opacity-70">
             <div class="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-900/40 to-transparent"></div>
             <div class="absolute bottom-0 left-0 right-0 p-12 text-white">
-                <ul class="space-y-4 max-w-md">
+                <ul class="space-y-4 max-w-md" data-stagger>
                     <li class="flex items-start gap-3">
                         <i class="fa-solid fa-calendar-check mt-1 text-amber-400" aria-hidden="true"></i>
                         <div>
@@ -171,6 +171,11 @@
         import authApi from '/js/api/auth.js';
         import { showAlert, showFieldErrors, clearFieldErrors } from '/js/components/notification.js';
         import { setButtonLoading } from '/js/lib/dom.js';
+        import { initMotion } from '/js/lib/motion.js';
+
+        // These pages deliberately skip initApp(): there is no header or footer
+        // to load, so motion is started directly instead.
+        initMotion();
 
         const form = document.getElementById('register-form');
         const alertBox = document.getElementById('form-alert');

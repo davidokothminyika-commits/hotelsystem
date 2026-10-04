@@ -17,7 +17,9 @@
         "check:pages": "node scripts/check-pages.mjs",
         "check:flows": "node scripts/check-flows.mjs",
         "check:auth": "node scripts/check-auth.mjs",
-        "check": "npm run test && npm run check:pages && npm run check:flows && npm run check:auth",
+        "check:amenities": "node scripts/check-amenities.mjs",
+        "check": "npm run test && npm run check:pages && npm run check:flows && npm run check:auth && npm run check:amenities",
+        "images:menu": "node scripts/fetch-menu-images.mjs",
         "scaffold:pages": "node scripts/scaffold-pages.mjs",
         "scaffold:guest-pages": "node scripts/scaffold-guest-pages.mjs"
     },

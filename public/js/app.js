@@ -26,9 +26,11 @@
  */
 import { loadComponent, loadComponents } from './components/loader.js';
 import { initHeader } from './components/header.js';
+import { initMotion } from './lib/motion.js';
 import { setUnauthenticatedHandler } from './api/api.js';
 
 export { loadComponent, loadComponents };
+export { initMotion, observe as observeMotion, stagger, countUp } from './lib/motion.js';
 
 /**
  * Loads and initialises the shared page furniture.
@@ -58,6 +60,10 @@ export async function initApp(options = {}) {
 
     // Components fetch in parallel so the page appears in one step.
     await Promise.all(parts);
+
+    // Started before anything else so content rendered from here on animates in
+    // as it arrives rather than appearing fully settled.
+    initMotion();
 
     const user = await initHeader();
     initFooter();

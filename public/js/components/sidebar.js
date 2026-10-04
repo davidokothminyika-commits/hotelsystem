@@ -13,6 +13,7 @@
  * COMMUNICATION
  * initSidebar(user) -> reads the role -> renders nav -> highlights current page
  */
+import authApi from '../api/auth.js';
 import { getElement } from '../lib/dom.js';
 
 /** Navigation definition per role. */
@@ -146,6 +147,10 @@ export function initSidebar(user) {
 
     nav.textContent = '';
 
+    // Links are numbered across the whole role, not per section, so the
+    // navigation fills in as one sequence rather than restarting per heading.
+    let linkIndex = 0;
+
     for (const group of items) {
         const title = document.createElement('p');
         title.className = 'nav-section-title';
@@ -153,7 +158,10 @@ export function initSidebar(user) {
         nav.appendChild(title);
 
         for (const item of group.items) {
-            nav.appendChild(buildNavLink(item));
+            const link = buildNavLink(item);
+            link.style.setProperty('--reveal-delay', `${Math.min(linkIndex, 10) * 30}ms`);
+            linkIndex += 1;
+            nav.appendChild(link);
         }
     }
 
@@ -168,6 +176,40 @@ export function initSidebar(user) {
 
     highlightCurrent(items);
     setupCollapse();
+    setupLogout();
+}
+
+/**
+ * Signs the user out from the sidebar footer.
+ *
+ * The header already offers a sign out inside the account dropdown, but on a
+ * phone that menu is behind two taps and the dropdown closes on any outside
+ * click, so it is easy to lose. The sidebar footer is always on screen, which
+ * makes it the reliable way out of the dashboard.
+ */
+function setupLogout() {
+    const button = getElement('#sidebar-logout');
+    if (!button) return;
+
+    button.addEventListener('click', async () => {
+        button.disabled = true;
+
+        // Confirm while the request is in flight so the button cannot be
+        // double-clicked into two sign out calls.
+        const label = button.querySelector('.nav-label');
+        if (label) label.textContent = 'Signing out...';
+
+        try {
+            await authApi.logout();
+            // A full navigation, not a client side redirect, so no cached
+            // page state or in-memory user object survives the sign out.
+            window.location.href = '/pages/auth/login.html';
+        } catch (error) {
+            console.error('[sidebar] Sign out failed:', error.message);
+            button.disabled = false;
+            if (label) label.textContent = 'Sign out';
+        }
+    });
 }
 
 /** Builds one navigation link. */

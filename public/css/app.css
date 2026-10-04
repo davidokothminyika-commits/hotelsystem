@@ -82,6 +82,21 @@
 
     /* Focus ring, used for keyboard accessibility */
     --ring: 0 0 0 3px rgb(202 138 4 / 0.45);
+
+    /* Motion
+       Durations are short on purpose. Interface animation should confirm an
+       action, not entertain: anything past roughly 400ms starts to feel like
+       the page is waiting for permission to respond. */
+    --dur-instant: 120ms;
+    --dur-fast: 180ms;
+    --dur-base: 260ms;
+    --dur-slow: 420ms;
+
+    /* Easing. A decelerating curve for anything entering the screen, because
+       objects arriving should settle rather than stop dead. */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* --------------------------------------------------------------------------
@@ -422,12 +437,81 @@ body {
     min-height: 100vh;
 }
 
+/*
+ * THE SIDEBAR IS A FIXED SHELL WITH ONE SCROLLING REGION
+
+ * The sidebar is a viewport-height column that does not scroll itself. Only
+ * #sidebar-nav scrolls. That keeps the brand row and the identity plus sign out
+ * footer always visible, which matters most for an administrator whose role
+ * carries six navigation sections and would otherwise have to scroll to the
+ * bottom of the page to sign out.
+
+ * `position: sticky` rather than `fixed` keeps the sidebar in normal document
+ * flow, so it does not need a top offset to clear the sticky page header, and
+ * the flex layout in .page-shell still places it beside the content.
+ */
 .sidebar {
+    position: sticky;
+    top: 0;
     width: 16rem;
+    height: 100vh;
     flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* the shell never scrolls; only the nav does */
     background-color: var(--brand-900);
+    background-image: linear-gradient(180deg, #1c1917 0%, #161311 100%);
     color: var(--brand-300);
-    transition: transform 0.25s ease;
+    box-shadow: inset -1px 0 0 rgb(255 255 255 / 0.05);
+    transition: transform 0.25s ease, width 0.2s ease;
+}
+
+/* Subtle fade at the ends of the nav, so a long list reads as scrollable. */
+.sidebar-nav {
+    /* Room for the scrollbar gutter so text does not shift on overflow. */
+    scrollbar-width: thin;
+    scrollbar-color: var(--brand-700) transparent;
+    /* Bleed the scrollbar to the sidebar edge rather than the content edge. */
+    padding-inline: 0.75rem;
+    margin-inline: -0.75rem;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+    background-color: var(--brand-700);
+    border-radius: 9999px;
+    /* Inset so the thumb floats rather than touching the edge. */
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+.sidebar-nav:hover::-webkit-scrollbar-thumb {
+    background-color: var(--brand-600);
+}
+
+/* Mask the hard cut at the top and bottom of the scroll area. */
+@supports (mask-image: linear-gradient(#000, #000)) {
+    .sidebar-nav {
+        mask-image: linear-gradient(
+            to bottom,
+            transparent 0,
+            #000 0.75rem,
+            #000 calc(100% - 0.75rem),
+            transparent 100%
+        );
+    }
+}
+
+/* The footer is a distinct band, so the scrollable area reads as inset. */
+.sidebar-footer {
+    box-shadow: 0 -8px 16px -12px rgb(0 0 0 / 0.9);
 }
 
 /* Collapsed state on desktop: narrow icon rail. */
@@ -439,6 +523,14 @@ body {
 .sidebar.is-collapsed .nav-section-title,
 .sidebar.is-collapsed .sidebar-user-info {
     display: none;
+}
+
+/* In the rail the links centre on their icon, and the sign out button must
+ * keep its square hit area rather than inherit the full-width button box. */
+.sidebar.is-collapsed .nav-link {
+    justify-content: center;
+    padding-inline: 0;
+    border-left-width: 0;
 }
 
 .main-content {
@@ -454,6 +546,7 @@ body {
     font-size: 0.875rem;
     color: var(--brand-300);
     border-left: 3px solid transparent;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
     text-decoration: none;
     transition: background-color 0.15s, color 0.15s;
 }
@@ -468,6 +561,23 @@ body {
     border-left-color: var(--accent-500);
     color: #fff;
     font-weight: 500;
+}
+
+/* A button carrying .nav-link must not inherit the browser default chrome,
+   or the sign out control sits misaligned inside the footer. */
+button.nav-link {
+    background: none;
+    border-top: 0;
+    border-right: 0;
+    border-bottom: 0;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+}
+
+button.nav-link:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
 }
 
 .nav-section-title {
@@ -497,6 +607,26 @@ body {
     backdrop-filter: blur(2px);
 }
 
+/* The dimmed backdrop fades rather than appearing at once, so the dialog does
+ * not slam onto the screen. `@starting-style` animates the first frame, which
+ * a plain transition cannot reach; browsers without support simply show it. */
+@starting-style {
+    .modal[open]::backdrop {
+        background-color: rgb(28 25 23 / 0);
+        backdrop-filter: blur(0);
+    }
+}
+
+@supports (transition-behavior: allow-discrete) {
+    .modal[open]::backdrop {
+        transition:
+            background-color var(--dur-base) ease,
+            backdrop-filter var(--dur-base) ease,
+            overlay var(--dur-base) allow-discrete,
+            display var(--dur-base) allow-discrete;
+    }
+}
+
 .modal-panel {
     width: 100%;
     max-width: 32rem;
@@ -505,6 +635,32 @@ body {
     background-color: #fff;
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-lg);
+    /* Grows into place from 96%, which is subtle at this size and reads as
+       material rather than as a flashing rectangle. */
+    animation: motion-pop var(--dur-base) var(--ease-spring);
+}
+
+/*
+ * Closing.
+ *
+ * The <dialog> is removed on its close event, which fires before an exit
+ * animation could finish. modal.js adds .is-closing first and defers the
+ * close, and ::backdrop stays painted for the same duration.
+ */
+.modal.is-closing {
+    animation: none;
+}
+
+.modal.is-closing .modal-panel {
+    animation: motion-pop var(--dur-fast) var(--ease-in-out) reverse forwards;
+}
+
+.modal.is-closing::backdrop {
+    background-color: rgb(28 25 23 / 0);
+    backdrop-filter: blur(0);
+    transition:
+        background-color var(--dur-fast) ease,
+        backdrop-filter var(--dur-fast) ease;
 }
 
 .modal-lg .modal-panel {
@@ -550,6 +706,36 @@ body {
     to   { opacity: 1; transform: translateX(0); }
 }
 
+/* Dismissing.
+ * notification.js adds .is-leaving and waits for animationend before removing
+ * the element, so the toast slides away rather than blinking out. */
+.toast.is-leaving {
+    animation: motion-fade-out var(--dur-fast) ease-in forwards;
+    pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   Focus and hover motion for the shared navigation
+   -------------------------------------------------------------------------- */
+.nav-link {
+    transition:
+        background-color var(--dur-fast) ease,
+        color var(--dur-fast) ease,
+        border-color var(--dur-fast) ease;
+}
+
+/* A new set of navigation links reads as the sidebar filling in, rather than
+ * as text that was already there and happened to be re-read. */
+.nav-link {
+    animation: motion-enter-x var(--dur-base) var(--ease-out) backwards;
+    animation-delay: var(--reveal-delay, 0ms);
+}
+
+/* Icon-only rail: the label is hidden, so the link must not animate a slide. */
+.sidebar.is-collapsed .nav-link {
+    animation: motion-fade-in var(--dur-fast) ease backwards;
+}
+
 /* --------------------------------------------------------------------------
    Skeleton loading
    Shown while a component waits on fetch(), so the layout does not jump.
@@ -572,6 +758,266 @@ body {
 }
 
 /* --------------------------------------------------------------------------
+   Motion
+
+   THE RULES THIS SECTION FOLLOWS
+
+   1. MOTION IS NEVER LOAD-BEARING.
+      Every animated element ends in a fully visible, correctly positioned
+      state. If an animation is skipped, interrupted, or never runs, the page
+      still works and still reads.
+
+   2. NOTHING STARTS INVISIBLE UNLESS SCRIPT PROMISES TO REVEAL IT.
+      [data-reveal] elements are opacity: 0 until the observer in lib/motion.js
+      marks them revealed. That is the one rule with a failure mode, so the
+      observer reveals everything immediately when it cannot run at all: no
+      IntersectionObserver, a reduced-motion preference, or JavaScript errors.
+
+   3. REDUCED MOTION IS HONOURED GLOBALLY.
+      The prefers-reduced-motion block near the top of this file collapses
+      every duration in the application, so nothing here needs its own guard.
+   -------------------------------------------------------------------------- */
+
+/* The entrance used by most things: rise into place while fading up. */
+@keyframes motion-enter {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 14px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+/* A smaller rise, for elements that are already close to their final size. */
+@keyframes motion-enter-sm {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 6px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+/* Enters from the side, used by navigation that slides in. */
+@keyframes motion-enter-x {
+    from {
+        opacity: 0;
+        transform: translate3d(-10px, 0, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+/* Grows out from slightly small, for dialogs and popovers. */
+@keyframes motion-pop {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes motion-fade-out {
+    from {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+    to {
+        opacity: 0;
+        transform: translate3d(0, -6px, 0);
+    }
+}
+
+@keyframes motion-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/*
+ * Scroll reveal.
+ *
+ * `will-change` is deliberately absent: it promotes the element to its own
+ * compositor layer for the whole time it sits on the page, and on a long
+ * scrolling page with dozens of cards that costs more memory than the animation
+ * is worth.
+ */
+[data-reveal] {
+    opacity: 0;
+    /* The starting offset is animated by the keyframes above, so the
+       transition below only ever handles the class change. */
+    animation: motion-enter var(--dur-slow) var(--ease-out) backwards;
+    animation-delay: var(--reveal-delay, 0ms);
+    will-change: auto;
+}
+
+[data-reveal].is-revealed {
+    opacity: 1;
+}
+
+/*
+ * A slower, more deliberate variant for large blocks of text and photography,
+ * which read better arriving from slightly further away.
+ */
+[data-reveal='fade'] {
+    animation-name: motion-fade-in;
+}
+
+/* Directional reveals for content that enters from an edge. */
+[data-reveal='left']  { animation-name: motion-enter-x; }
+[data-reveal='right'] { animation-name: motion-enter-x; }
+
+/*
+ * Staggering.
+ *
+ * A group of items arriving one after another reads as a single thought
+ * assembling rather than as a batch of unrelated things appearing. The delay
+ * comes from --reveal-delay, which lib/motion.js sets per element from its
+ * position in the group.
+ *
+ * The step shrinks as the group grows (see STAGGER_STEP in motion.js), so a
+ * long list never leaves the last item waiting: even forty cards finish within
+ * well under a second.
+ */
+[data-stagger] > * {
+    animation-delay: var(--reveal-delay, 0ms);
+}
+
+/*
+ * Children of a group that carry no data-reveal of their own animate as part
+ * of the cascade. Deliberately without `forwards`: if lib/motion.js never
+ * runs, the animation simply plays once at load and the elements are left in
+ * their normal visible state. A group marked up this way degrades to a plain
+ * page rather than to an empty one.
+ */
+[data-stagger] > *:not([data-reveal]) {
+    animation: motion-enter var(--dur-slow) var(--ease-out) backwards;
+}
+
+/*
+ * Utilities for pages that would rather write a class than a data attribute.
+ * .animate-enter plays immediately on load, which suits above-the-fold content
+ * that is already on screen when the page paints.
+ */
+.animate-enter {
+    animation: motion-enter var(--dur-slow) var(--ease-out) backwards;
+}
+
+.animate-fade {
+    animation: motion-fade-in var(--dur-base) var(--ease-out) backwards;
+}
+
+/* --------------------------------------------------------------------------
+   Interaction feedback
+
+   The whole interface answers a click now: a press moves the control, hover
+   lifts it. Transform and box-shadow are the only properties animated, both of
+   which the compositor can handle without a layout pass.
+   -------------------------------------------------------------------------- */
+
+/* Press feedback on anything that looks like a button. */
+.btn,
+.nav-link,
+.badge,
+.tab {
+    transition:
+        background-color var(--dur-fast) ease,
+        color var(--dur-fast) ease,
+        border-color var(--dur-fast) ease,
+        box-shadow var(--dur-fast) ease,
+        transform var(--dur-instant) var(--ease-out),
+        opacity var(--dur-fast) ease;
+}
+
+.btn:active:not(:disabled):not([aria-disabled='true']) {
+    transform: translateY(1px) scale(0.985);
+}
+
+/* The primary action lifts a little further, so it is obviously the one to press. */
+.btn-primary:hover:not(:disabled),
+.btn-danger:hover:not(:disabled),
+.btn-success:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-primary:active:not(:disabled),
+.btn-danger:active:not(:disabled),
+.btn-success:active:not(:disabled) {
+    transform: translateY(0) scale(0.985);
+    box-shadow: var(--shadow-sm);
+}
+
+/*
+ * Cards lift on hover and their photograph zooms slightly inside the frame.
+ * The image is scaled rather than the frame, which reads as depth and never
+ * changes the size of the card or the gap beside it.
+ */
+.card-hover {
+    transition:
+        box-shadow var(--dur-base) ease,
+        transform var(--dur-base) var(--ease-out),
+        border-color var(--dur-base) ease;
+    will-change: transform;
+}
+
+.card-hover:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-3px);
+}
+
+.card-hover:active {
+    transform: translateY(-1px);
+}
+
+/* A card that contains a media frame: zoom the picture on hover. */
+.card-hover .card-media {
+    overflow: hidden;
+}
+
+.card-hover .card-media img {
+    transition: transform var(--dur-slow) var(--ease-out);
+}
+
+.card-hover:hover .card-media img {
+    transform: scale(1.05);
+}
+
+/* Table rows confirm the pointer without the delay of a colour change alone. */
+.table tbody tr {
+    transition: background-color var(--dur-fast) ease;
+}
+
+/* Form controls acknowledge focus with a border shift as well as the ring. */
+.form-input,
+.form-select,
+.form-textarea {
+    transition:
+        border-color var(--dur-fast) ease,
+        box-shadow var(--dur-fast) ease,
+        background-color var(--dur-fast) ease;
+}
+
+/* --------------------------------------------------------------------------
+   Page transitions
+
+   A dashboard page arrives as one movement rather than a static layout that
+   suddenly has content in it. Applied by components/shell.js to the content
+   region, so the sidebar and header stay put and only the data settles.
+   -------------------------------------------------------------------------- */
+.page-content-enter {
+    animation: motion-enter var(--dur-base) var(--ease-out) backwards;
+}
+
+/* --------------------------------------------------------------------------
    Utilities
    -------------------------------------------------------------------------- */
 .line-clamp-2 {
@@ -588,22 +1034,33 @@ body {
     overflow: hidden;
 }
 
-/* Hide the mobile sidebar by default; the toggle adds .is-open. */
+/* Hide the mobile sidebar by default; the toggle adds .is-open.
+ *
+ * The drawer uses the same fixed shell, only taken out of flow with position:
+ * fixed so it can slide over the page. height: 100dvh rather than 100vh, because
+ * on a phone the browser chrome changes the visible height and a 100vh drawer
+ * ends up with its footer below the fold. */
 @media (max-width: 1023px) {
     .sidebar {
         position: fixed;
         inset: 0 auto 0 0;
+        height: 100dvh;
         z-index: 50;
         transform: translateX(-100%);
+        box-shadow: none;
     }
     .sidebar.is-open {
         transform: translateX(0);
+        box-shadow: var(--shadow-lg);
     }
     .sidebar.is-collapsed {
         width: 16rem;
     }
     .sidebar.is-collapsed .nav-label {
         display: inline;
+    }
+    .sidebar.is-collapsed .nav-section-title {
+        display: block;
     }
 }
 

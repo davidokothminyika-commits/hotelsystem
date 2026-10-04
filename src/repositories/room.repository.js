@@ -24,7 +24,7 @@ const ROOM_COLUMNS = `
     r.id, r.room_number, r.floor, r.capacity, r.price_per_night,
     r.description, r.status, r.image, r.is_active,
     rt.id AS room_type_id, rt.name AS room_type, rt.slug AS room_type_slug,
-    rt.size_sqm, rt.bed_configuration
+    rt.size_sqm, rt.bed_configuration, rt.image AS room_type_image
 `;
 
 /** Columns a room listing may be sorted by. */
@@ -40,7 +40,10 @@ export function mapRoom(row) {
         pricePerNight: Number(row.price_per_night),
         description: row.description,
         status: row.status,
-        image: row.image,
+        // A room usually has no photograph of its own, only its type does, so
+        // the type image is the fallback. Without it every room card renders
+        // the grey placeholder and the availability grid looks empty.
+        image: row.image || row.room_type_image || null,
         isActive: Boolean(row.is_active),
         roomType: {
             id: row.room_type_id,
@@ -48,6 +51,7 @@ export function mapRoom(row) {
             slug: row.room_type_slug,
             sizeSqm: row.size_sqm,
             bedConfiguration: row.bed_configuration,
+            image: row.room_type_image || null,
         },
         // mysql2 returns this JSON aggregate as an already-parsed array, so it must
         // not be passed to JSON.parse a second time.

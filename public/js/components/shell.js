@@ -122,7 +122,10 @@ export async function buildShell({ title, subtitle = '', roles = [], header = tr
     // ---- Content ----
     const content = document.createElement('div');
     content.id = 'page-content';
-    content.className = 'flex-1 p-4 sm:p-6';
+    // page-content-enter settles the content area in. The cards inside it are
+    // handled by lib/motion.js as they are rendered, so this only needs to set
+    // the frame they arrive into rather than animating a blank panel.
+    content.className = 'flex-1 p-4 sm:p-6 page-content-enter';
     main.appendChild(content);
 
     root.appendChild(main);

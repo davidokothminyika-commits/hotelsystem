@@ -23,6 +23,9 @@ import { getElement, escapeHtml } from '../lib/dom.js';
 
 const DEFAULT_DURATION = 4500;
 
+/** Matches the 180ms exit in app.css, with room for a slow frame. */
+const TOAST_EXIT_TIMEOUT = 320;
+
 /** Icons per type, chosen from a fixed map rather than interpolated classes. */
 const ICONS = {
     success: 'fa-circle-check',
@@ -102,8 +105,18 @@ function show({ type = 'info', message, duration = DEFAULT_DURATION, title = '' 
     region.appendChild(toast);
 
     const dismiss = () => {
-        if (!toast.isConnected) return;
-        toast.remove();
+        if (!toast.isConnected || toast.classList.contains('is-leaving')) return;
+
+        // Slide out before removing, so the stack closes up smoothly instead of
+        // having a gap appear in it.
+        toast.classList.add('is-leaving');
+
+        const remove = () => toast.remove();
+        toast.addEventListener('animationend', remove, { once: true });
+        // Reduced motion collapses the duration, but a browser that blocks
+        // animations entirely would never fire animationend, so the element is
+        // removed on a timer regardless.
+        setTimeout(remove, TOAST_EXIT_TIMEOUT);
     };
 
     close.addEventListener('click', dismiss);

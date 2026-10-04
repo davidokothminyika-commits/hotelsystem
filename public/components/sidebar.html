@@ -9,10 +9,10 @@
   manager and admin variants all use this one file.
 -->
 <aside id="app-sidebar" class="sidebar">
-    <div class="flex flex-col h-full">
+    <div class="flex flex-col h-full min-h-0">
 
         <!-- Brand and collapse control -->
-        <div class="flex items-center justify-between gap-2 px-4 h-16 border-b border-stone-800">
+        <div class="flex items-center justify-between gap-2 px-4 h-16 shrink-0 border-b border-stone-800/80">
             <a href="/" class="flex items-center gap-2.5 min-w-0">
                 <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-600 text-stone-900 shrink-0">
                     <i class="fa-solid fa-hotel" aria-hidden="true"></i>
@@ -33,22 +33,42 @@
             </button>
         </div>
 
-        <!-- Navigation, populated by sidebar.js -->
-        <nav id="sidebar-nav" class="flex-1 overflow-y-auto py-3" aria-label="Dashboard navigation">
+        <!-- Navigation, populated by sidebar.js.
+
+             This is the only scrollable region. The brand row above and the
+             identity and sign out footer below are fixed, so the sidebar shell
+             never moves and the brand does not scroll away. -->
+        <nav id="sidebar-nav" class="sidebar-nav flex-1 min-h-0 overflow-y-auto py-3" aria-label="Dashboard navigation">
             <p class="px-4 py-2 text-xs text-stone-500">Loading navigation...</p>
         </nav>
 
-        <!-- Signed in identity -->
-        <div class="px-4 py-3 border-t border-stone-800">
-            <div class="sidebar-user-info flex items-center gap-2.5">
+        <!-- Signed in identity, plus the sign out control.
+
+             This footer sits outside the scrolling nav region, so the sign out
+             button stays reachable no matter how many navigation items a role
+             has. It is the primary way out of the dashboard for anyone using a
+             phone, where the header account menu is behind two taps. -->
+        <div class="sidebar-footer px-3 py-3 border-t border-stone-800/80 shrink-0 bg-stone-900/40">
+            <a href="/pages/guest/profile.html"
+               class="sidebar-user-info flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-white/5 transition group">
                 <span id="sidebar-avatar"
-                      class="flex items-center justify-center w-8 h-8 rounded-full bg-amber-600 text-stone-900 text-xs font-bold shrink-0"
+                      class="flex items-center justify-center w-9 h-9 rounded-full bg-amber-600 text-stone-900 text-xs font-bold shrink-0"
                       aria-hidden="true">--</span>
-                <span class="min-w-0">
-                    <span class="block text-xs font-medium text-white truncate" id="sidebar-name"></span>
+                <span class="min-w-0 flex-1">
+                    <span class="block text-xs font-semibold text-white truncate group-hover:text-amber-400 transition" id="sidebar-name"></span>
                     <span class="block text-[10px] text-stone-500 truncate" id="sidebar-email"></span>
                 </span>
-            </div>
+                <i class="fa-solid fa-chevron-right text-[10px] text-stone-600 group-hover:text-amber-500 transition" aria-hidden="true"></i>
+            </a>
+
+            <!-- Sign out. Populated as a real button by sidebar.js. -->
+            <button type="button"
+                    id="sidebar-logout"
+                    class="nav-link mt-1 w-full text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                    title="Sign out">
+                <i class="fa-solid fa-right-from-bracket w-4 text-center shrink-0" aria-hidden="true"></i>
+                <span class="nav-label">Sign out</span>
+            </button>
         </div>
     </div>
 </aside>

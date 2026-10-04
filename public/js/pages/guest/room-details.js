@@ -172,10 +172,14 @@ if (shell?.content && roomId) {
         const main = createElement('div', { class: 'lg:col-span-2 space-y-6' });
 
         const figure = createElement('figure', { class: 'rounded-xl overflow-hidden border border-stone-200 bg-stone-200' });
-        if (room.image) {
+        // Rooms usually carry no photograph of their own, so fall back to the
+        // room type image rather than showing the placeholder every time.
+        const image = room.image || room.roomType?.image;
+
+        if (image) {
             figure.appendChild(
                 createElement('img', {
-                    src: room.image,
+                    src: image,
                     // The number is already in the heading below, so repeating
                     // it for a screen reader adds noise rather than detail.
                     alt: `${room.roomType?.name || 'Room'} interior`,
@@ -183,8 +187,8 @@ if (shell?.content && roomId) {
                 }),
             );
         } else {
-            // Seeded rooms often have no photograph. A placeholder keeps the
-            // layout intact instead of leaving a broken image box.
+            // A room type with no image and a room with no image. A placeholder
+            // keeps the layout intact instead of leaving a broken image box.
             const placeholder = createElement('div', {
                 class: 'h-72 sm:h-96 flex items-center justify-center text-stone-400',
             });

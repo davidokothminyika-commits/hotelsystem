@@ -19,7 +19,7 @@
 
         <!-- Form side -->
         <div class="flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-16">
-            <div class="mx-auto w-full max-w-sm">
+            <div class="mx-auto w-full max-w-sm" data-reveal>
 
                 <!-- Brand -->
                 <a href="/" class="inline-flex items-center gap-2.5 mb-10">
@@ -94,16 +94,18 @@
                     <p class="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-3">
                         Demo accounts
                     </p>
-                    <div class="grid gap-1.5" id="demo-accounts">
+                    <div class="grid gap-1.5" id="demo-accounts" data-stagger>
                         <p class="text-xs text-stone-400">Loading...</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Imagery side, hidden on small screens -->
-        <div class="hidden lg:block relative bg-stone-900">
-            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1600&q=80"
+        <!-- Imagery side, hidden on small screens. A plain fade rather than a
+             rise: the photograph is a backdrop, so sliding it would read as a
+             separate object arriving instead of the page opening. -->
+        <div class="hidden lg:block relative bg-stone-900" data-reveal="fade">
+            <img src="/assets/images/site/auth-login.jpg"
                  alt="Aurelia Grand Hotel lobby with warm evening lighting"
                  class="absolute inset-0 w-full h-full object-cover opacity-70">
             <div class="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-900/40 to-transparent"></div>
@@ -126,6 +128,11 @@
         import { landingPageFor } from '/js/components/header.js';
         import { showAlert, showFieldErrors, clearFieldErrors } from '/js/components/notification.js';
         import { setButtonLoading, getQueryParam } from '/js/lib/dom.js';
+        import { initMotion } from '/js/lib/motion.js';
+
+        // These pages deliberately skip initApp(): there is no header or footer
+        // to load, so motion is started directly instead.
+        initMotion();
 
         const form = document.getElementById('login-form');
         const alertBox = document.getElementById('form-alert');

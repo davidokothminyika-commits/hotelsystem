@@ -1,0 +1,191 @@
+{
+    "continental-breakfast": {
+        "path": "/assets/images/dining/continental-breakfast.jpg",
+        "title": "Continental breakfast at Wikimania 2017-08-10.jpg",
+        "licence": "CC BY-SA 4.0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Continental%20breakfast%20at%20Wikimania%202017-08-10.jpg"
+    },
+    "full-english-breakfast": {
+        "path": "/assets/images/dining/full-english-breakfast.jpg",
+        "title": "Full English breakfast at the Chalet Cafe, Cowfold, West Sussex, England.jpg",
+        "licence": "CC BY-SA 4.0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Full%20English%20breakfast%20at%20the%20Chalet%20Cafe%2C%20Cowfold%2C%20West%20Sussex%2C%20England.jpg"
+    },
+    "avocado-toast": {
+        "path": "/assets/images/dining/avocado-toast.jpg",
+        "title": "Smashed Avocado On Toast (with one poached egg) - Jonny's 2026-01-06.jpg",
+        "licence": "CC0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Smashed%20Avocado%20On%20Toast%20(with%20one%20poached%20egg)%20-%20Jonny's%202026-01-06.jpg"
+    },
+    "pancake-stack": {
+        "path": "/assets/images/dining/pancake-stack.jpg",
+        "title": "Pancake with maple syrup 1.jpg",
+        "licence": "CC BY-SA 4.0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Pancake%20with%20maple%20syrup%201.jpg"
+    },
+    "chicken-caesar-salad": {
+        "path": "/assets/images/dining/chicken-caesar-salad.jpg",
+        "title": "Caesar salad with chicken, homemade - Massachusetts.jpg",
+        "licence": "CC0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Caesar%20salad%20with%20chicken%2C%20homemade%20-%20Massachusetts.jpg"
+    },
+    "grilled-vegetable-platter": {
+        "path": "/assets/images/dining/grilled-vegetable-platter.jpg",
+        "title": "Sunday roast vegetable side dish at The Stag, Little Easton, Essex, England.jpg",
+        "licence": "CC BY-SA 4.0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Sunday%20roast%20vegetable%20side%20dish%20at%20The%20Stag%2C%20Little%20Easton%2C%20Essex%2C%20England.jpg"
+    },
+    "club-sandwich": {
+        "path": "/assets/images/dining/club-sandwich.jpg",
+        "title": "Club-sandwich.jpg",
+        "licence": "CC BY 3.0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Club-sandwich.jpg"
+    },
+    "margherita-pizza": {
+        "path": "/assets/images/dining/margherita-pizza.jpg",
+        "title": "Pizza-napoletana.jpg",
+        "licence": "CC BY-SA 4.0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Pizza-napoletana.jpg"
+    },
+    "mushroom-risotto": {
+        "path": "/assets/images/dining/mushroom-risotto.jpg",
+        "title": "Mushroom Risotto (4789415965).jpg",
+        "licence": "CC BY-SA 2.0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Mushroom%20Risotto%20(4789415965).jpg"
+    },
+    "grilled-salmon": {
+        "path": "/assets/images/dining/grilled-salmon.jpg",
+        "title": "Grilled plated salmon fillet (cropped).jpg",
+        "licence": "CC0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Grilled%20plated%20salmon%20fillet%20(cropped).jpg"
+    },
+    "ribeye-steak": {
+        "path": "/assets/images/dining/ribeye-steak.jpg",
+        "title": "Zinfandel paired with Angus Ribeye.jpg",
+        "licence": "CC BY-SA 2.0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Zinfandel%20paired%20with%20Angus%20Ribeye.jpg"
+    },
+    "chicken-tikka-masala": {
+        "path": "/assets/images/dining/chicken-tikka-masala.jpg",
+        "title": "Chicken Tikka Masala KellySue.JPG",
+        "licence": "CC BY 2.0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Chicken%20Tikka%20Masala%20KellySue.JPG"
+    },
+    "pasta-carbonara": {
+        "path": "/assets/images/dining/pasta-carbonara.jpg",
+        "title": "Espaguetis carbonara.jpg",
+        "licence": "CC BY-SA 4.0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Espaguetis%20carbonara.jpg"
+    },
+    "vegetable-curry": {
+        "path": "/assets/images/dining/vegetable-curry.jpg",
+        "title": "Mixed vegetable curry 1.jpg",
+        "licence": "CC BY-SA 4.0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Mixed%20vegetable%20curry%201.jpg"
+    },
+    "fresh-orange-juice": {
+        "path": "/assets/images/dining/fresh-orange-juice.jpg",
+        "title": "Orange juice 1 edit1.jpg",
+        "licence": "Public domain",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Orange%20juice%201%20edit1.jpg"
+    },
+    "cappuccino": {
+        "path": "/assets/images/dining/cappuccino.jpg",
+        "title": "Cappuccino-cup 20230110 103258.jpg",
+        "licence": "CC BY-SA 4.0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Cappuccino-cup%2020230110%20103258.jpg"
+    },
+    "still-water-750ml": {
+        "path": "/assets/images/dining/still-water-750ml.jpg",
+        "title": "Bottle, mineral water (AM 629708).jpg",
+        "licence": "CC BY 4.0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Bottle%2C%20mineral%20water%20(AM%20629708).jpg"
+    },
+    "house-red-wine": {
+        "path": "/assets/images/dining/house-red-wine.jpg",
+        "title": "Wine being poured into a glass.jpg",
+        "licence": "CC BY 2.0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Wine%20being%20poured%20into%20a%20glass.jpg"
+    },
+    "classic-martini": {
+        "path": "/assets/images/dining/classic-martini.jpg",
+        "title": "Martini 1.JPG",
+        "licence": "CC BY-SA 3.0 de",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Martini%201.JPG"
+    },
+    "chocolate-lava-cake": {
+        "path": "/assets/images/dining/chocolate-lava-cake.jpg",
+        "title": "Vegan Flourless Swiss Chocolate Molten Lava Cake (4867538601).jpg",
+        "licence": "CC BY 2.0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Vegan%20Flourless%20Swiss%20Chocolate%20Molten%20Lava%20Cake%20(4867538601).jpg"
+    },
+    "new-york-cheesecake": {
+        "path": "/assets/images/dining/new-york-cheesecake.jpg",
+        "title": "Cheesecake with slice cut out.jpg",
+        "licence": "CC BY 2.0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Cheesecake%20with%20slice%20cut%20out.jpg"
+    },
+    "fresh-fruit-platter": {
+        "path": "/assets/images/dining/fresh-fruit-platter.jpg",
+        "title": "Fruit Salad Or Fruit Bowl.jpg",
+        "licence": "CC BY-SA 4.0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Fruit%20Salad%20Or%20Fruit%20Bowl.jpg"
+    },
+    "sorbet-of-the-day": {
+        "path": "/assets/images/dining/sorbet-of-the-day.jpg",
+        "title": "Ice cream at Röe Gård.jpg",
+        "licence": "CC0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Ice%20cream%20at%20R%C3%B6e%20G%C3%A5rd.jpg"
+    },
+    "chicken-burger": {
+        "path": "/assets/images/dining/chicken-burger.jpg",
+        "title": "Chicken Caesar Burger - Leon 2024-10-27.jpg",
+        "licence": "CC0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Chicken%20Caesar%20Burger%20-%20Leon%202024-10-27.jpg"
+    },
+    "french-fries": {
+        "path": "/assets/images/dining/french-fries.jpg",
+        "title": "Fried egg surrounded by French fries on a white plate.jpg",
+        "licence": "CC BY-SA 3.0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Fried%20egg%20surrounded%20by%20French%20fries%20on%20a%20white%20plate.jpg"
+    },
+    "loaded-nachos": {
+        "path": "/assets/images/dining/loaded-nachos.jpg",
+        "title": "Nachos-cheese (cropped).jpg",
+        "licence": "CC BY 2.0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Nachos-cheese%20(cropped).jpg"
+    },
+    "chicken-wings": {
+        "path": "/assets/images/dining/chicken-wings.jpg",
+        "title": "Buffalo Burgers Buffalo Chicken Wings (36082467922).jpg",
+        "licence": "CC BY-SA 2.0",
+        "source": "commons.wikimedia.org",
+        "commonsUrl": "https://commons.wikimedia.org/wiki/File:Buffalo%20Burgers%20Buffalo%20Chicken%20Wings%20(36082467922).jpg"
+    }
+}

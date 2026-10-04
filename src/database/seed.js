@@ -26,9 +26,44 @@
  *   room_types, rooms, amenities, room_amenities, menu_categories, menu_items,
  *   reviews, bookings.
  */
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import bcrypt from 'bcryptjs';
 import { pool, execute, query, withTransaction, closePool } from '../config/db.js';
 import { PERMISSION_CATALOG } from '../repositories/permission.repository.js';
+
+/**
+ * Local menu photography, keyed by the slug in MENU_ITEMS.
+ *
+ * The photographs are committed under public/assets/images/dining and were
+ * fetched by scripts/fetch-menu-images.mjs from Wikimedia Commons, whose files
+ * carry explicit licences. Storing a path rather than a remote URL means the
+ * restaurant page renders with no third party request and no broken image when
+ * the network is unavailable.
+ *
+ * Each entry also records the source title and licence, which satisfy the CC BY
+ * and CC BY-SA attribution requirements. See public/assets/images/CREDITS.md.
+ *
+ * Only the path is written to the database: the `image` column is a VARCHAR
+ * holding a URL or a public path, and the browser is given a src, not a
+ * citation. Attribution lives with the code instead.
+ */
+const MENU_IMAGE_MANIFEST = JSON.parse(
+    readFileSync(
+        path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'public', 'assets', 'images', 'dining', 'manifest.json'),
+        'utf8',
+    ),
+);
+
+/** Menu slug -> local image path. */
+const MENU_IMAGES = Object.fromEntries(
+    Object.entries(MENU_IMAGE_MANIFEST).map(([slug, entry]) => [
+        slug,
+        // Tolerates the older string-only manifest format.
+        typeof entry === 'string' ? entry : entry.path,
+    ]),
+);
 
 const BCRYPT_ROUNDS = 10; // lower than production (12) so seeding stays fast
 
@@ -93,26 +128,31 @@ const ROOM_TYPES = [
     {
         slug: 'standard', name: 'Standard Room', basePrice: 95.00, maxCapacity: 2,
         sizeSqm: 24, bed: 'One Queen bed',
+        image: '/assets/images/rooms/standard.jpg',
         description: 'A comfortable, well appointed room for solo travellers or couples, with a work desk and blackout curtains.',
     },
     {
         slug: 'deluxe', name: 'Deluxe Room', basePrice: 145.00, maxCapacity: 3,
         sizeSqm: 32, bed: 'One King bed',
+        image: '/assets/images/rooms/deluxe.jpg',
         description: 'More space and natural light than a Standard room, with a seating area and premium bathroom amenities.',
     },
     {
         slug: 'executive', name: 'Executive Room', basePrice: 210.00, maxCapacity: 3,
         sizeSqm: 40, bed: 'One King bed',
+        image: '/assets/images/rooms/executive.jpg',
         description: 'Designed for business travellers, with a large desk, high speed internet and access to the executive lounge.',
     },
     {
         slug: 'suite', name: 'Suite', basePrice: 340.00, maxCapacity: 4,
         sizeSqm: 58, bed: 'One King bed and a sofa bed',
+        image: '/assets/images/rooms/suite.jpg',
         description: 'A separate living space, complimentary minibar and a deep soaking bath. Ideal for longer stays.',
     },
     {
         slug: 'family', name: 'Family Room', basePrice: 265.00, maxCapacity: 5,
         sizeSqm: 50, bed: 'One Queen bed and two singles',
+        image: '/assets/images/rooms/family.jpg',
         description: 'Two connecting rooms configured for families, with a child friendly layout and extra bathroom facilities.',
     },
 ];
@@ -143,38 +183,38 @@ const MENU_CATEGORIES = [
 
 const MENU_ITEMS = [
     // category slug, name, description, price, tags
-    { category: 'breakfast', name: 'Continental Breakfast', description: 'Selection of pastries, fresh fruit, yoghurt, juice and freshly brewed coffee.', price: 18.00, vegetarian: 1, prep: 15 },
-    { category: 'breakfast', name: 'Full English Breakfast',  description: 'Two eggs, pork sausages, grilled tomatoes, mushrooms, baked beans and toast.', price: 24.00, vegetarian: 0, prep: 20 },
-    { category: 'breakfast', name: 'Avocado Toast',           description: 'Sourdough toast with smashed avocado, poached eggs, chilli and lime.', price: 14.50, vegetarian: 1, prep: 12 },
-    { category: 'breakfast', name: 'Pancake Stack',          description: 'Three fluffy pancakes with maple syrup, seasonal berries and whipped cream.', price: 13.00, vegetarian: 1, prep: 15 },
+    { slug: 'continental-breakfast', category: 'breakfast', name: 'Continental Breakfast', description: 'Selection of pastries, fresh fruit, yoghurt, juice and freshly brewed coffee.', price: 18.00, vegetarian: 1, prep: 15 },
+    { slug: 'full-english-breakfast', category: 'breakfast', name: 'Full English Breakfast',  description: 'Two eggs, pork sausages, grilled tomatoes, mushrooms, baked beans and toast.', price: 24.00, vegetarian: 0, prep: 20 },
+    { slug: 'avocado-toast', category: 'breakfast', name: 'Avocado Toast',           description: 'Sourdough toast with smashed avocado, poached eggs, chilli and lime.', price: 14.50, vegetarian: 1, prep: 12 },
+    { slug: 'pancake-stack', category: 'breakfast', name: 'Pancake Stack',          description: 'Three fluffy pancakes with maple syrup, seasonal berries and whipped cream.', price: 13.00, vegetarian: 1, prep: 15 },
 
-    { category: 'lunch', name: 'Chicken Caesar Salad',      description: 'Cos lettuce, grilled chicken breast, parmesan, croutons and Caesar dressing.', price: 16.50, vegetarian: 0, prep: 12 },
-    { category: 'lunch', name: 'Grilled Vegetable Platter', description: 'Seasonal vegetables grilled with herbs and served with a balsamic reduction.', price: 15.00, vegetarian: 1, prep: 15 },
-    { category: 'lunch', name: 'Club Sandwich',             description: 'Grilled chicken, bacon, lettuce and tomato on toasted bread with chips.', price: 15.50, vegetarian: 0, prep: 12 },
-    { category: 'lunch', name: 'Margherita Pizza',          description: 'Stone baked pizza with San Marzano tomato, mozzarella and fresh basil.', price: 17.00, vegetarian: 1, prep: 18 },
-    { category: 'lunch', name: 'Mushroom Risotto',          description: 'Creamy arborio rice with wild mushrooms, parmesan and truffle oil.', price: 21.00, vegetarian: 1, prep: 25 },
+    { slug: 'chicken-caesar-salad', category: 'lunch', name: 'Chicken Caesar Salad',      description: 'Cos lettuce, grilled chicken breast, parmesan, croutons and Caesar dressing.', price: 16.50, vegetarian: 0, prep: 12 },
+    { slug: 'grilled-vegetable-platter', category: 'lunch', name: 'Grilled Vegetable Platter', description: 'Seasonal vegetables grilled with herbs and served with a balsamic reduction.', price: 15.00, vegetarian: 1, prep: 15 },
+    { slug: 'club-sandwich', category: 'lunch', name: 'Club Sandwich',             description: 'Grilled chicken, bacon, lettuce and tomato on toasted bread with chips.', price: 15.50, vegetarian: 0, prep: 12 },
+    { slug: 'margherita-pizza', category: 'lunch', name: 'Margherita Pizza',          description: 'Stone baked pizza with San Marzano tomato, mozzarella and fresh basil.', price: 17.00, vegetarian: 1, prep: 18 },
+    { slug: 'mushroom-risotto', category: 'lunch', name: 'Mushroom Risotto',          description: 'Creamy arborio rice with wild mushrooms, parmesan and truffle oil.', price: 21.00, vegetarian: 1, prep: 25 },
 
-    { category: 'dinner', name: 'Grilled Salmon',        description: 'Atlantic salmon fillet with seasonal vegetables and a lemon butter sauce.', price: 32.00, vegetarian: 0, prep: 25 },
-    { category: 'dinner', name: 'Ribeye Steak',          description: '300g ribeye grilled to your preference, served with roast potatoes and greens.', price: 45.00, vegetarian: 0, prep: 30 },
-    { category: 'dinner', name: 'Chicken Tikka Masala',  description: 'Chargrilled chicken in a spiced tomato and cream sauce, served with naan.', price: 24.00, vegetarian: 0, spicy: 1, prep: 25 },
-    { category: 'dinner', name: 'Pasta Carbonara',       description: 'Spaghetti with pancetta, egg yolk, pecorino and black pepper.', price: 19.50, vegetarian: 0, prep: 18 },
-    { category: 'dinner', name: 'Vegetable Curry',       description: 'Seasonal vegetables in a fragrant coconut and spice sauce with jasmine rice.', price: 20.00, vegetarian: 1, spicy: 1, prep: 22 },
+    { slug: 'grilled-salmon', category: 'dinner', name: 'Grilled Salmon',        description: 'Atlantic salmon fillet with seasonal vegetables and a lemon butter sauce.', price: 32.00, vegetarian: 0, prep: 25 },
+    { slug: 'ribeye-steak', category: 'dinner', name: 'Ribeye Steak',          description: '300g ribeye grilled to your preference, served with roast potatoes and greens.', price: 45.00, vegetarian: 0, prep: 30 },
+    { slug: 'chicken-tikka-masala', category: 'dinner', name: 'Chicken Tikka Masala',  description: 'Chargrilled chicken in a spiced tomato and cream sauce, served with naan.', price: 24.00, vegetarian: 0, spicy: 1, prep: 25 },
+    { slug: 'pasta-carbonara', category: 'dinner', name: 'Pasta Carbonara',       description: 'Spaghetti with pancetta, egg yolk, pecorino and black pepper.', price: 19.50, vegetarian: 0, prep: 18 },
+    { slug: 'vegetable-curry', category: 'dinner', name: 'Vegetable Curry',       description: 'Seasonal vegetables in a fragrant coconut and spice sauce with jasmine rice.', price: 20.00, vegetarian: 1, spicy: 1, prep: 22 },
 
-    { category: 'drinks', name: 'Fresh Orange Juice',  description: 'Served chilled, freshly squeezed each morning.', price: 6.00, vegetarian: 1, prep: 5 },
-    { category: 'drinks', name: 'Cappuccino',          description: 'Espresso topped with steamed milk and a dusting of cocoa.', price: 5.00, vegetarian: 1, prep: 7 },
-    { category: 'drinks', name: 'Still Water 750ml',   description: 'Bottled mineral water.', price: 3.50, vegetarian: 1, prep: 2 },
-    { category: 'drinks', name: 'House Red Wine',     description: 'A glass of the house red, a light fruity blend.', price: 9.00, vegetarian: 1, prep: 5 },
-    { category: 'drinks', name: 'Classic Martini',     description: 'Gin and dry vermouth with a twist of lemon.', price: 14.00, vegetarian: 1, prep: 8 },
+    { slug: 'fresh-orange-juice', category: 'drinks', name: 'Fresh Orange Juice',  description: 'Served chilled, freshly squeezed each morning.', price: 6.00, vegetarian: 1, prep: 5 },
+    { slug: 'cappuccino', category: 'drinks', name: 'Cappuccino',          description: 'Espresso topped with steamed milk and a dusting of cocoa.', price: 5.00, vegetarian: 1, prep: 7 },
+    { slug: 'still-water-750ml', category: 'drinks', name: 'Still Water 750ml',   description: 'Bottled mineral water.', price: 3.50, vegetarian: 1, prep: 2 },
+    { slug: 'house-red-wine', category: 'drinks', name: 'House Red Wine',     description: 'A glass of the house red, a light fruity blend.', price: 9.00, vegetarian: 1, prep: 5 },
+    { slug: 'classic-martini', category: 'drinks', name: 'Classic Martini',     description: 'Gin and dry vermouth with a twist of lemon.', price: 14.00, vegetarian: 1, prep: 8 },
 
-    { category: 'desserts', name: 'Chocolate Lava Cake', description: 'Warm chocolate sponge with a molten centre and vanilla ice cream.', price: 11.00, vegetarian: 1, prep: 15 },
-    { category: 'desserts', name: 'New York Cheesecake', description: 'Baked cheesecake with a crisp biscuit base and seasonal coulis.', price: 9.50, vegetarian: 1, prep: 8 },
-    { category: 'desserts', name: 'Fresh Fruit Platter', description: 'A generous selection of sliced seasonal fruit.', price: 8.50, vegetarian: 1, prep: 10 },
-    { category: 'desserts', name: 'Sorbet of the Day',   description: 'Two scoops of seasonal sorbet, served chilled.', price: 7.00, vegetarian: 1, prep: 5 },
+    { slug: 'chocolate-lava-cake', category: 'desserts', name: 'Chocolate Lava Cake', description: 'Warm chocolate sponge with a molten centre and vanilla ice cream.', price: 11.00, vegetarian: 1, prep: 15 },
+    { slug: 'new-york-cheesecake', category: 'desserts', name: 'New York Cheesecake', description: 'Baked cheesecake with a crisp biscuit base and seasonal coulis.', price: 9.50, vegetarian: 1, prep: 8 },
+    { slug: 'fresh-fruit-platter', category: 'desserts', name: 'Fresh Fruit Platter', description: 'A generous selection of sliced seasonal fruit.', price: 8.50, vegetarian: 1, prep: 10 },
+    { slug: 'sorbet-of-the-day', category: 'desserts', name: 'Sorbet of the Day',   description: 'Two scoops of seasonal sorbet, served chilled.', price: 7.00, vegetarian: 1, prep: 5 },
 
-    { category: 'snacks', name: 'Chicken Burger',   description: 'Grilled chicken breast in a brioche bun with lettuce and house sauce.', price: 14.00, vegetarian: 0, prep: 15 },
-    { category: 'snacks', name: 'French Fries',     description: 'Hand cut potatoes twice fried with sea salt.', price: 6.00, vegetarian: 1, prep: 10 },
-    { category: 'snacks', name: 'Loaded Nachos',    description: 'Corn tortilla chips with cheese sauce, jalapenos and salsa.', price: 12.00, vegetarian: 1, spicy: 1, prep: 12 },
-    { category: 'snacks', name: 'Chicken Wings',    description: 'Eight wings glazed in a choice of sauce, served with dip.', price: 13.00, vegetarian: 0, spicy: 1, prep: 18 },
+    { slug: 'chicken-burger', category: 'snacks', name: 'Chicken Burger',   description: 'Grilled chicken breast in a brioche bun with lettuce and house sauce.', price: 14.00, vegetarian: 0, prep: 15 },
+    { slug: 'french-fries', category: 'snacks', name: 'French Fries',     description: 'Hand cut potatoes twice fried with sea salt.', price: 6.00, vegetarian: 1, prep: 10 },
+    { slug: 'loaded-nachos', category: 'snacks', name: 'Loaded Nachos',    description: 'Corn tortilla chips with cheese sauce, jalapenos and salsa.', price: 12.00, vegetarian: 1, spicy: 1, prep: 12 },
+    { slug: 'chicken-wings', category: 'snacks', name: 'Chicken Wings',    description: 'Eight wings glazed in a choice of sauce, served with dip.', price: 13.00, vegetarian: 0, spicy: 1, prep: 18 },
 ];
 
 /** Deterministic pseudo-random so repeated seeds produce the same dataset. */
@@ -292,12 +332,12 @@ async function seedRooms() {
     const typeIds = {};
     for (const type of ROOM_TYPES) {
         await execute(
-            `INSERT INTO room_types (name, slug, description, base_price, max_capacity, size_sqm, bed_configuration)
-             VALUES (:name, :slug, :description, :basePrice, :maxCapacity, :sizeSqm, :bed)
+            `INSERT INTO room_types (name, slug, description, base_price, max_capacity, size_sqm, bed_configuration, image)
+             VALUES (:name, :slug, :description, :basePrice, :maxCapacity, :sizeSqm, :bed, :image)
              ON DUPLICATE KEY UPDATE
                 description = VALUES(description), base_price = VALUES(base_price),
                 max_capacity = VALUES(max_capacity), size_sqm = VALUES(size_sqm),
-                bed_configuration = VALUES(bed_configuration)`,
+                bed_configuration = VALUES(bed_configuration), image = VALUES(image)`,
             type,
         );
         const [rows] = await pool.query('SELECT id FROM room_types WHERE slug = ?', [type.slug]);
@@ -412,6 +452,7 @@ async function seedMenu() {
     console.log(`  ${MENU_CATEGORIES.length} categories`);
 
     let itemCount = 0;
+    let imageUpdates = 0;
     for (const item of MENU_ITEMS) {
         const categoryId = categoryIds[item.category];
         const existing = await query(
@@ -419,25 +460,39 @@ async function seedMenu() {
             { name: item.name, categoryId },
         );
 
+        const image = MENU_IMAGES[item.slug] || null;
+
         if (existing.length === 0) {
             await execute(
                 `INSERT INTO menu_items
-                   (category_id, name, description, price, is_vegetarian, is_spicy, is_available, prep_minutes)
-                 VALUES (:categoryId, :name, :description, :price, :vegetarian, :spicy, 1, :prep)`,
+                   (category_id, name, description, price, image, is_vegetarian, is_spicy, is_available, prep_minutes)
+                 VALUES (:categoryId, :name, :description, :price, :image, :vegetarian, :spicy, 1, :prep)`,
                 {
                     categoryId,
                     name: item.name,
                     description: item.description,
                     price: item.price,
+                    image,
                     vegetarian: item.vegetarian || 0,
                     spicy: item.spicy || 0,
                     prep: item.prep,
                 },
             );
             itemCount += 1;
+        } else if (existing[0].image !== image) {
+            // The item already exists from an earlier seed, so backfill the
+            // photograph rather than leaving the card without one. Only the
+            // image is touched: prices and availability are staff decisions
+            // and a re-seed should not undo them.
+            await execute('UPDATE menu_items SET image = :image WHERE id = :id', {
+                image,
+                id: existing[0].id,
+            });
+            imageUpdates += 1;
         }
     }
     console.log(`  ${itemCount} new menu items (${MENU_ITEMS.length} total defined)`);
+    if (imageUpdates > 0) console.log(`  ${imageUpdates} existing menu images refreshed`);
 }
 
 async function seedReviews(userIds) {
@@ -605,9 +660,8 @@ async function main() {
 // Only execute when run directly, so tests can import helpers safely.
 // Comparing the resolved entry path against this file's own URL is exact,
 // unlike matching on a filename substring.
-import { fileURLToPath } from 'node:url';
 const isDirectRun =
-    process.argv[1] && fileURLToPath(import.meta.url) === (await import('node:path')).resolve(process.argv[1]);
+    process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1]);
 
 if (isDirectRun) {
     main()

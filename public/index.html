@@ -26,13 +26,17 @@
              Full height on large screens, with the availability search
              overlaid at the bottom so it is the first interactive element.
              ================================================================ -->
-        <section class="relative bg-stone-900 min-h-[600px] lg:min-h-[680px] flex items-center">
-            <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=2000&q=80"
+        <section class="relative bg-stone-900 min-h-[600px] lg:min-h-[680px] flex items-center" data-reveal>
+            <img src="/assets/images/site/hero-hotel.jpg"
                  alt="The exterior of Aurelia Grand Hotel at dusk"
-                 class="absolute inset-0 w-full h-full object-cover">
+                 class="absolute inset-0 w-full h-full object-cover animate-fade">
             <div class="absolute inset-0 bg-gradient-to-b from-stone-900/70 via-stone-900/50 to-stone-900/80"></div>
 
-            <div class="relative w-full max-w-7xl mx-auto px-4 sm:px-6 py-20 text-center text-white">
+            <!-- data-stagger makes the headline, copy and calls to action arrive
+                 in reading order rather than all at once. The delays come from
+                 lib/motion.js. -->
+            <div class="relative w-full max-w-7xl mx-auto px-4 sm:px-6 py-20 text-center text-white"
+                 data-stagger>
                 <p class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-400 mb-6">
                     <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
                     Riverside Drive, Nairobi
@@ -64,7 +68,7 @@
              keeps the hero image uncluttered and the form fully visible on
              small screens.
              ================================================================ -->
-        <section class="relative z-10 -mt-10 px-4 sm:px-6">
+        <section class="relative z-10 -mt-10 px-4 sm:px-6" data-reveal>
             <div class="max-w-5xl mx-auto">
                 <form id="availability-form"
                       class="card shadow-lg p-5 sm:p-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5 items-end">
@@ -103,7 +107,7 @@
         <!-- ================================================================
              INTRODUCTION
              ================================================================ -->
-        <section class="py-20 px-4 sm:px-6">
+        <section class="py-20 px-4 sm:px-6" data-reveal>
             <div class="max-w-6xl mx-auto grid gap-12 lg:grid-cols-2 items-center">
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 mb-3">The hotel</p>
@@ -125,7 +129,9 @@
                     <dl class="grid grid-cols-3 gap-6 pt-6 border-t border-stone-200">
                         <div>
                             <dt class="text-xs text-stone-500 uppercase tracking-wide">Rooms</dt>
-                            <dd class="text-2xl font-bold text-stone-900 mt-1">60</dd>
+                            <dd class="text-2xl font-bold text-stone-900 mt-1">
+                                <span data-count data-count-to="60">60</span>
+                            </dd>
                         </div>
                         <div>
                             <dt class="text-xs text-stone-500 uppercase tracking-wide">Opened</dt>
@@ -134,7 +140,7 @@
                         <div>
                             <dt class="text-xs text-stone-500 uppercase tracking-wide">Rating</dt>
                             <dd class="text-2xl font-bold text-stone-900 mt-1 flex items-center gap-1.5">
-                                4.7
+                                <span data-count data-count-to="4.7">4.7</span>
                                 <i class="fa-solid fa-star text-amber-500 text-base" aria-hidden="true"></i>
                             </dd>
                         </div>
@@ -142,10 +148,10 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
-                    <img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80"
+                    <img src="/assets/images/rooms/executive.jpg"
                          alt="A hotel bedroom with a king bed and city view"
                          class="rounded-xl w-full h-64 lg:h-80 object-cover">
-                    <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80"
+                    <img src="/assets/images/rooms/suite.jpg"
                          alt="A hotel bathroom with a large bathtub"
                          class="rounded-xl w-full h-64 lg:h-80 object-cover mt-8">
                 </div>
@@ -157,7 +163,7 @@
              Loaded from the API so the page always reflects the real
              inventory rather than a hard coded copy that could drift.
              ================================================================ -->
-        <section class="py-20 px-4 sm:px-6 bg-stone-50" id="rooms">
+        <section class="py-20 px-4 sm:px-6 bg-stone-50" id="rooms" data-reveal>
             <div class="max-w-7xl mx-auto">
                 <div class="flex flex-wrap items-end justify-between gap-4 mb-10">
                     <div>
@@ -182,78 +188,26 @@
 
         <!-- ================================================================
              AMENITIES
+             The cards are rendered from js/data/amenities.js so that the
+             summary shown here and the detail page each card links to are
+             always the same amenity. Editing one file updates both.
              ================================================================ -->
-        <section class="py-20 px-4 sm:px-6" id="amenities">
+        <section class="py-20 px-4 sm:px-6" id="amenities" data-reveal>
             <div class="max-w-7xl mx-auto">
                 <div class="text-center mb-12">
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 mb-3">What is here</p>
                     <h2 class="text-3xl sm:text-4xl font-bold text-stone-900">Amenities</h2>
+                    <p class="text-stone-500 mt-3 max-w-2xl mx-auto">
+                        Everything in the hotel, and where to find it. Select any of them to read more.
+                    </p>
                 </div>
 
-                <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                    <article class="card card-hover p-6">
-                        <span class="flex items-center justify-center w-11 h-11 rounded-lg bg-amber-100 text-amber-700 mb-4">
-                            <i class="fa-solid fa-wifi" aria-hidden="true"></i>
-                        </span>
-                        <h3 class="font-semibold text-stone-900 mb-1.5">WiFi throughout</h3>
-                        <p class="text-sm text-stone-500 leading-relaxed">Fibre in every room and public space.</p>
-                    </article>
-
-                    <article class="card card-hover p-6">
-                        <span class="flex items-center justify-center w-11 h-11 rounded-lg bg-amber-100 text-amber-700 mb-4">
-                            <i class="fa-solid fa-utensils" aria-hidden="true"></i>
-                        </span>
-                        <h3 class="font-semibold text-stone-900 mb-1.5">Seasonal restaurant</h3>
-                        <p class="text-sm text-stone-500 leading-relaxed">Breakfast, lunch and dinner, plus room service.</p>
-                    </article>
-
-                    <article class="card card-hover p-6">
-                        <span class="flex items-center justify-center w-11 h-11 rounded-lg bg-amber-100 text-amber-700 mb-4">
-                            <i class="fa-solid fa-dumbbell" aria-hidden="true"></i>
-                        </span>
-                        <h3 class="font-semibold text-stone-900 mb-1.5">Rooftop terrace</h3>
-                        <p class="text-sm text-stone-500 leading-relaxed">Open from six, with a view across the skyline.</p>
-                    </article>
-
-                    <article class="card card-hover p-6">
-                        <span class="flex items-center justify-center w-11 h-11 rounded-lg bg-amber-100 text-amber-700 mb-4">
-                            <i class="fa-solid fa-concierge-bell" aria-hidden="true"></i>
-                        </span>
-                        <h3 class="font-semibold text-stone-900 mb-1.5">24 hour reception</h3>
-                        <p class="text-sm text-stone-500 leading-relaxed">Staffed around the clock for arrivals and requests.</p>
-                    </article>
-
-                    <article class="card card-hover p-6">
-                        <span class="flex items-center justify-center w-11 h-11 rounded-lg bg-amber-100 text-amber-700 mb-4">
-                            <i class="fa-solid fa-car" aria-hidden="true"></i>
-                        </span>
-                        <h3 class="font-semibold text-stone-900 mb-1.5">Secure parking</h3>
-                        <p class="text-sm text-stone-500 leading-relaxed">Covered parking on site, with valet on request.</p>
-                    </article>
-
-                    <article class="card card-hover p-6">
-                        <span class="flex items-center justify-center w-11 h-11 rounded-lg bg-amber-100 text-amber-700 mb-4">
-                            <i class="fa-solid fa-tshirt" aria-hidden="true"></i>
-                        </span>
-                        <h3 class="font-semibold text-stone-900 mb-1.5">Laundry service</h3>
-                        <p class="text-sm text-stone-500 leading-relaxed">Same day turnaround before 10am.</p>
-                    </article>
-
-                    <article class="card card-hover p-6">
-                        <span class="flex items-center justify-center w-11 h-11 rounded-lg bg-amber-100 text-amber-700 mb-4">
-                            <i class="fa-solid fa-heart-pulse" aria-hidden="true"></i>
-                        </span>
-                        <h3 class="font-semibold text-stone-900 mb-1.5">Fitness room</h3>
-                        <p class="text-sm text-stone-500 leading-relaxed">Cardio and free weights, open from five.</p>
-                    </article>
-
-                    <article class="card card-hover p-6">
-                        <span class="flex items-center justify-center w-11 h-11 rounded-lg bg-amber-100 text-amber-700 mb-4">
-                            <i class="fa-solid fa-champagne-glasses" aria-hidden="true"></i>
-                        </span>
-                        <h3 class="font-semibold text-stone-900 mb-1.5">Function rooms</h3>
-                        <p class="text-sm text-stone-500 leading-relaxed">Two rooms for up to eighty seated guests.</p>
-                    </article>
+                <div id="amenities-grid" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    <!-- Skeletons while the grid is built, so the layout does not jump -->
+                    <div class="skeleton h-52 rounded-xl"></div>
+                    <div class="skeleton h-52 rounded-xl"></div>
+                    <div class="skeleton h-52 rounded-xl"></div>
+                    <div class="skeleton h-52 rounded-xl"></div>
                 </div>
             </div>
         </section>
@@ -261,9 +215,9 @@
         <!-- ================================================================
              RESTAURANT
              ================================================================ -->
-        <section class="py-20 px-4 sm:px-6 bg-stone-900 text-white" id="restaurant">
+        <section class="py-20 px-4 sm:px-6 bg-stone-900 text-white" id="restaurant" data-reveal>
             <div class="max-w-7xl mx-auto grid gap-12 lg:grid-cols-2 items-center">
-                <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1200&q=80"
+                <img src="/assets/images/site/restaurant.jpg"
                      alt="A plated seasonal dish on a restaurant table"
                      class="rounded-xl w-full h-80 lg:h-[480px] object-cover">
 
@@ -298,7 +252,7 @@
         <!-- ================================================================
              SPECIAL OFFERS
              ================================================================ -->
-        <section class="py-20 px-4 sm:px-6" id="offers">
+        <section class="py-20 px-4 sm:px-6" id="offers" data-reveal>
             <div class="max-w-7xl mx-auto">
                 <div class="text-center mb-12">
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 mb-3">Rates</p>
@@ -372,7 +326,7 @@
         <!-- ================================================================
              GALLERY
              ================================================================ -->
-        <section class="py-20 px-4 sm:px-6 bg-stone-50" id="gallery">
+        <section class="py-20 px-4 sm:px-6 bg-stone-50" id="gallery" data-reveal>
             <div class="max-w-7xl mx-auto">
                 <div class="text-center mb-12">
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 mb-3">The hotel</p>
@@ -380,21 +334,21 @@
                 </div>
 
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <img src="https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=800&q=80"
+                    <img src="/assets/images/gallery/reception.jpg"
                          alt="Aurelia Grand Hotel reception hall" class="rounded-lg w-full h-48 md:h-64 object-cover">
-                    <img src="https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=800&q=80"
+                    <img src="/assets/images/gallery/suite-living.jpg"
                          alt="Aurelia Grand Hotel suite living area" class="rounded-lg w-full h-48 md:h-64 object-cover">
-                    <img src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=800&q=80"
+                    <img src="/assets/images/gallery/pool-terrace.jpg"
                          alt="The hotel pool terrace at sunset" class="rounded-lg w-full h-48 md:h-64 object-cover">
-                    <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80"
+                    <img src="/assets/images/gallery/river-view.jpg"
                          alt="A guest room with a river view" class="rounded-lg w-full h-48 md:h-64 object-cover">
-                    <img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80"
+                    <img src="/assets/images/gallery/rooftop.jpg"
                          alt="Aurelia Grand Hotel rooftop terrace" class="rounded-lg w-full h-48 md:h-64 object-cover">
-                    <img src="https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=800&q=80"
+                    <img src="/assets/images/gallery/lobby.jpg"
                          alt="The hotel lobby seating area" class="rounded-lg w-full h-48 md:h-64 object-cover">
-                    <img src="https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=800&q=80"
+                    <img src="/assets/images/rooms/standard.jpg"
                          alt="A standard room interior" class="rounded-lg w-full h-48 md:h-64 object-cover">
-                    <img src="https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=800&q=80"
+                    <img src="/assets/images/gallery/rooftop-bar.jpg"
                          alt="The rooftop bar at evening" class="rounded-lg w-full h-48 md:h-64 object-cover">
                 </div>
             </div>
@@ -405,7 +359,7 @@
              Loaded from /api/reviews so the ratings are real, computed from
              the reviews table rather than hard coded.
              ================================================================ -->
-        <section class="py-20 px-4 sm:px-6" id="reviews">
+        <section class="py-20 px-4 sm:px-6" id="reviews" data-reveal>
             <div class="max-w-7xl mx-auto">
                 <div class="text-center mb-12">
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 mb-3">Guest feedback</p>
@@ -430,7 +384,7 @@
         <!-- ================================================================
              LOCATION AND CONTACT
              ================================================================ -->
-        <section class="py-20 px-4 sm:px-6 bg-stone-50" id="location">
+        <section class="py-20 px-4 sm:px-6 bg-stone-50" id="location" data-reveal>
             <div class="max-w-7xl mx-auto grid gap-12 lg:grid-cols-2">
 
                 <div>
@@ -498,7 +452,7 @@
                 <!-- Stylised map: a static illustration rather than a third
                      party embed, so the page works with no external key. -->
                 <div class="relative rounded-xl overflow-hidden border border-stone-200 bg-stone-200 h-80 lg:h-auto min-h-[380px]">
-                    <img src="https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=1200&q=80"
+                    <img src="/assets/images/site/location.jpg"
                          alt="Map showing the location of Aurelia Grand Hotel on Riverside Drive"
                          class="w-full h-full object-cover">
                     <div class="absolute inset-0 bg-stone-900/10"></div>
@@ -516,7 +470,7 @@
              Posts to the chat system, which is a real endpoint rather than a
              decorative form.
              ================================================================ -->
-        <section class="py-20 px-4 sm:px-6" id="contact">
+        <section class="py-20 px-4 sm:px-6" id="contact" data-reveal>
             <div class="max-w-3xl mx-auto">
                 <div class="text-center mb-10">
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 mb-3">Enquiries</p>
@@ -563,8 +517,59 @@
         import roomsApi from '/js/api/rooms.js';
         import api from '/js/api/api.js';
         import { showSkeleton, showEmptyState } from '/js/lib/dom.js';
+        import { AMENITIES, amenityPageUrl } from '/js/data/amenities.js';
 
         await initApp();
+
+        // =====================================================================
+        // Amenities
+        // Built from the shared module so the card and the page it opens always
+        // describe the same amenity. The whole card is the link, because a link
+        // around only the heading would be a small target with no obvious cue.
+        // =====================================================================
+        const amenitiesGrid = document.getElementById('amenities-grid');
+
+        function renderAmenities(items) {
+            amenitiesGrid.textContent = '';
+
+            for (const amenity of items) {
+                const card = document.createElement('a');
+                card.href = amenityPageUrl(amenity.slug);
+                card.className = 'card card-hover p-6 flex flex-col';
+
+                const icon = document.createElement('span');
+                icon.className =
+                    'flex items-center justify-center w-11 h-11 rounded-lg bg-amber-100 text-amber-700 mb-4';
+                const iconEl = document.createElement('i');
+                iconEl.className = `fa-solid ${amenity.icon}`;
+                iconEl.setAttribute('aria-hidden', 'true');
+                icon.appendChild(iconEl);
+
+                const heading = document.createElement('h3');
+                heading.className = 'font-semibold text-stone-900 mb-1.5';
+                heading.textContent = amenity.name;
+
+                const tagline = document.createElement('p');
+                tagline.className = 'text-sm text-stone-500 leading-relaxed flex-1';
+                tagline.textContent = amenity.tagline;
+
+                // The affordance that makes the card read as clickable. Pushed
+                // to the bottom with mt-auto so the cards line up in a row.
+                const more = document.createElement('span');
+                more.className =
+                    'inline-flex items-center gap-1.5 mt-4 text-sm font-medium text-amber-700';
+                more.textContent = 'Explore';
+                const arrow = document.createElement('i');
+                arrow.className = 'fa-solid fa-arrow-right text-xs';
+                arrow.setAttribute('aria-hidden', 'true');
+                more.appendChild(arrow);
+
+                card.append(icon, heading, tagline, more);
+                amenitiesGrid.appendChild(card);
+            }
+        }
+
+        renderAmenities(AMENITIES);
 
         // =====================================================================
         // Availability search
@@ -637,11 +642,11 @@
         };
 
         const TYPE_IMAGES = {
-            standard: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=900&q=80',
-            deluxe: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=900&q=80',
-            executive: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=900&q=80',
-            suite: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=900&q=80',
-            family: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=900&q=80',
+            standard: '/assets/images/rooms/standard.jpg',
+            deluxe: '/assets/images/rooms/deluxe.jpg',
+            executive: '/assets/images/rooms/executive.jpg',
+            suite: '/assets/images/rooms/suite.jpg',
+            family: '/assets/images/rooms/family.jpg',
         };
 
         function renderRoomTypes(roomTypes) {

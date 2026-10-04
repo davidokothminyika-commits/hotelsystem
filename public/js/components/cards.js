@@ -88,12 +88,18 @@ export function roomCard(room, onBook) {
     const card = createElement('article', { class: 'card card-hover overflow-hidden flex flex-col' });
 
     // ---- Image ----
+    // card-media marks the frame as a crop window: app.css zooms the picture
+    // slightly on hover while the frame itself stays the same size.
     const figure = document.createElement('div');
-    figure.className = 'relative h-48 bg-stone-200';
+    figure.className = 'card-media relative h-48 bg-stone-200';
 
-    if (room.image) {
+    // A room rarely has its own photograph, so fall back to the type image
+    // rather than showing the placeholder for every card in the grid.
+    const image = room.image || room.roomType?.image;
+
+    if (image) {
         const img = createElement('img', {
-            src: room.image,
+            src: image,
             alt: `${room.roomType?.name || 'Room'} ${room.roomNumber}`,
             class: 'w-full h-full object-cover',
             loading: 'lazy',
@@ -376,7 +382,7 @@ export function menuItemCard(item, onAdd) {
 
     // ---- Image ----
     const figure = document.createElement('div');
-    figure.className = 'relative h-40 bg-stone-200';
+    figure.className = 'card-media relative h-40 bg-stone-200';
 
     if (item.image) {
         const img = createElement('img', {

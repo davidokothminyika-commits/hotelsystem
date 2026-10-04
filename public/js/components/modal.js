@@ -121,10 +121,10 @@ export function createDialog({ title, description, bodyHtml, bodyNode, footerHtm
     // Stops a click on the dimmed backdrop from closing the dialog while a
     // click inside it should not.
     dialog.addEventListener('click', (event) => {
-        if (event.target === dialog) dialog.close();
+        if (event.target === dialog) closeWithAnimation(dialog);
     });
 
-    closeButton.addEventListener('click', () => dialog.close());
+    closeButton.addEventListener('click', () => closeWithAnimation(dialog));
 
     dialog.addEventListener('close', () => {
         // Return focus to whatever opened the dialog, so keyboard users are
@@ -149,7 +149,7 @@ export function openModal(options) {
 
     // Only one modal at a time, so Escape and focus behave predictably.
     const existing = root.querySelector('dialog[open]');
-    if (existing) existing.close();
+    if (existing) closeWithAnimation(existing);
 
     const dialog = createDialog(options);
     root.appendChild(dialog);
@@ -169,6 +169,54 @@ export function openModal(options) {
 function closeButtonOf(dialog) {
     return dialog.querySelector('button[aria-label="Close dialog"]');
 }
+
+/**
+ * Closes a dialog after playing its exit animation.
+ *
+ * `close()` is what actually removes the dialog, and it fires the close event
+ * that callers use to resolve their promises. Delaying it is safe because the
+ * dialog stays open, focusable and Escape-responsive throughout.
+ *
+ * Falls back to closing straight away when motion is not wanted, and when the
+ * animation somehow never fires, so a dialog can never be left stuck open.
+ */
+function closeWithAnimation(dialog) {
+    if (!dialog || !dialog.open) return;
+
+    const instant =
+        typeof window.matchMedia === 'function' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (instant) {
+        dialog.close();
+        return;
+    }
+
+    if (dialog.dataset.closing === 'true') return;
+    dialog.dataset.closing = 'true';
+    // app.css reverses the entrance animation for this state.
+    dialog.classList.add('is-closing');
+
+    let fallback = setTimeout(() => {
+        fallback = null;
+        dialog.close();
+    }, CLOSE_TIMEOUT);
+
+    dialog.addEventListener(
+        'animationend',
+        (event) => {
+            // Ignore the backdrop fade and any animation inside the panel.
+            if (!event.target.classList.contains('modal-panel')) return;
+            if (fallback) clearTimeout(fallback);
+            fallback = null;
+            dialog.close();
+        },
+        { once: true },
+    );
+}
+
+/** Matches the 180ms exit in app.css, with room for a slow frame. */
+const CLOSE_TIMEOUT = 320;
 
 /**
  * Confirmation dialog. Resolves true when confirmed, false otherwise, so it
@@ -204,11 +252,11 @@ export function confirmDialog({
 
         dialog.querySelector('[data-modal-confirm]').addEventListener('click', () => {
             dialog.returnValue = 'confirm';
-            dialog.close();
+            closeWithAnimation(dialog);
         });
         dialog.querySelector('[data-modal-cancel]').addEventListener('click', () => {
             dialog.returnValue = 'cancel';
-            dialog.close();
+            closeWithAnimation(dialog);
         });
     });
 }
@@ -225,7 +273,8 @@ function escapeText(value) {
  */
 export function closeModal() {
     const root = getRoot();
-    root.querySelector('dialog[open]')?.close();
+    const open = root.querySelector('dialog[open]');
+    if (open) closeWithAnimation(open);
 }
 
 export default { openModal, confirmDialog, closeModal };

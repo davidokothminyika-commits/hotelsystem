@@ -160,14 +160,19 @@ export function createToolbar(controls, onChange) {
 
         // A search field reports on `input`, debounced, so typing does not fire
         // a request per keystroke. Everything else reports on `change`.
+        //
+        // The value is read from `field`, the built control, not from `control`,
+        // the descriptor. A descriptor carries the options and labels but no
+        // DOM node, so reading from it threw on every keystroke and left every
+        // filter in the console dead.
         if (control.type === 'search') {
             field.element.addEventListener(
                 'input',
-                debounce(() => onChange?.(control.name, readControl(control)), 350),
+                debounce(() => onChange?.(control.name, readControl(field)), 350),
             );
         } else {
             field.element.addEventListener(control.event || 'change', () => {
-                onChange?.(control.name, readControl(control));
+                onChange?.(control.name, readControl(field));
             });
         }
 
@@ -377,15 +382,25 @@ export function createListController({
  * than shown as a toast, so the user can see what to fix without losing what
  * they typed.
  *
+ * The save callback is named `run`, matching `confirmAndRun`, and every caller
+ * passes it under that name.
+ *
  * @param {object} options
  * @param {string} options.title
  * @param {Array} options.fields  See `buildField`.
- * @param {Function} options.onSubmit  Receives the collected values; throw to reject.
+ * @param {Function} options.run  Receives the collected values; throw to reject.
  * @param {string} [options.submitLabel='Save']
  * @param {HTMLElement} [options.opener]
  * @returns {Promise<boolean>} Resolves true when saved, false when dismissed.
  */
-export function openFormModal({ title, fields, onSubmit, submitLabel = 'Save', opener, description = '' }) {
+export function openFormModal({ title, fields, run, submitLabel = 'Save', opener, description = '' }) {
+    // A missing callback used to surface as a "onSubmit is not a function" toast
+    // on submit, which looked like the button was broken. Fail loudly at open
+    // time instead, naming the caller's mistake.
+    if (typeof run !== 'function') {
+        throw new TypeError('openFormModal requires a `run` callback that receives the field values');
+    }
+
     return new Promise((resolve) => {
         const form = createElement('form', { class: 'space-y-4', novalidate: true });
 
@@ -508,7 +523,7 @@ export function openFormModal({ title, fields, onSubmit, submitLabel = 'Save', o
             setButtonLoading(submit, true, 'Saving...');
 
             try {
-                await onSubmit(values);
+                await run(values);
                 dialog.close();
                 finish(true);
             } catch (error) {

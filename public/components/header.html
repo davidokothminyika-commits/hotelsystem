@@ -12,16 +12,16 @@
 <header class="sticky top-0 z-30 bg-stone-900 text-stone-100 shadow-md">
     <div class="flex items-center justify-between gap-4 px-4 sm:px-6 h-16">
 
-        <!-- Brand -->
+        <!-- Brand. The name, tagline and logo are written in by
+             public/js/components/branding.js, so an administrator can change
+             them from the settings screen without editing this file. -->
         <a href="/" class="flex items-center gap-2.5 shrink-0 group">
-            <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-amber-600 text-stone-900">
-                <i class="fa-solid fa-hotel" aria-hidden="true"></i>
-            </span>
+            <span data-brand="logo" class="flex items-center justify-center w-9 h-9 rounded-lg bg-amber-600 text-stone-900"></span>
             <span class="hidden sm:block">
-                <span class="block text-sm font-semibold tracking-wide text-white leading-tight">
+                <span class="block text-sm font-semibold tracking-wide text-white leading-tight" data-brand="name">
                     Aurelia Grand Hotel
                 </span>
-                <span class="block text-[11px] text-stone-400 leading-tight">
+                <span class="block text-[11px] text-stone-400 leading-tight" data-brand="tagline">
                     Nairobi, Kenya
                 </span>
             </span>

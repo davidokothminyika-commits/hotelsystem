@@ -33,6 +33,7 @@ import reviewRoutes from './reviews.routes.js';
 import messageRoutes from './messages.routes.js';
 import notificationRoutes from './notifications.routes.js';
 import auditRoutes from './audit.routes.js';
+import settingsRoutes from './settings.routes.js';
 
 const router = Router();
 
@@ -68,6 +69,9 @@ router.use('/messages', messageRoutes);
 router.use('/notifications', notificationRoutes);
 // Mounted with the admin-only guard inside audit.routes.js itself.
 router.use('/audit-logs', auditRoutes);
+// Partly public: the branding read and the logo are needed before sign in,
+// and the guard for the write endpoints lives inside settings.routes.js.
+router.use('/settings', settingsRoutes);
 
 // Mounted without a role guard here on purpose: the guard lives inside
 // admin.routes.js as `router.use(requireRole('admin'))`, so every route added

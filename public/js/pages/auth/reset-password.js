@@ -24,6 +24,7 @@ import { initApp } from '../../app.js';
 import authApi from '../../api/auth.js';
 import { showAlert, clearFieldErrors, notify } from '../../components/notification.js';
 import { getQueryParam, setButtonLoading } from '../../lib/dom.js';
+import { initBranding } from '../../components/branding.js';
 
 await initApp({ footer: true, sidebar: false });
 
@@ -75,12 +76,10 @@ function brand() {
     link.href = '/';
     link.className = 'inline-flex items-center gap-2.5 mb-8';
     link.innerHTML = `
-        <span class="flex items-center justify-center w-10 h-10 rounded-lg bg-amber-600 text-stone-900">
-            <i class="fa-solid fa-hotel" aria-hidden="true"></i>
-        </span>
+        <span data-brand="logo" class="flex items-center justify-center w-10 h-10 rounded-lg bg-amber-600 text-stone-900"></span>
         <span>
-            <span class="block text-base font-semibold text-stone-900 leading-tight">Aurelia Grand Hotel</span>
-            <span class="block text-xs text-stone-500">Nairobi, Kenya</span>
+            <span class="block text-base font-semibold text-stone-900 leading-tight" data-brand="name">Aurelia Grand Hotel</span>
+            <span class="block text-xs text-stone-500" data-brand="tagline">Nairobi, Kenya</span>
         </span>`;
     return link;
 }
@@ -313,3 +312,7 @@ if (!token) {
         });
     }
 }
+
+// The brand card is rendered after initApp() has already run, so the
+// configured hotel name and logo are applied once it is in the document.
+await initBranding();

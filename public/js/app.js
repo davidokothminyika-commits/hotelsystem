@@ -26,11 +26,13 @@
  */
 import { loadComponent, loadComponents } from './components/loader.js';
 import { initHeader } from './components/header.js';
+import { initBranding } from './components/branding.js';
 import { initMotion } from './lib/motion.js';
 import { setUnauthenticatedHandler } from './api/api.js';
 
 export { loadComponent, loadComponents };
 export { initMotion, observe as observeMotion, stagger, countUp } from './lib/motion.js';
+export { initBranding, brandName } from './components/branding.js';
 
 /**
  * Loads and initialises the shared page furniture.
@@ -64,6 +66,11 @@ export async function initApp(options = {}) {
     // Started before anything else so content rendered from here on animates in
     // as it arrives rather than appearing fully settled.
     initMotion();
+
+    // The header, sidebar and footer are in the document now, so the hotel's
+    // configured name and logo can be written into them before the first
+    // header paint. It never rejects: a failure leaves the shipped defaults.
+    await initBranding();
 
     const user = await initHeader();
     initFooter();

@@ -50,6 +50,7 @@ export const AUDIT_ACTIONS = Object.freeze({
     REVIEW_CREATED: 'review.created',
     REVIEW_MODERATED: 'review.moderated',
     MESSAGE_SENT: 'chat.message_sent',
+    BRANDING_UPDATED: 'settings.branding_updated',
 });
 
 const auditService = {

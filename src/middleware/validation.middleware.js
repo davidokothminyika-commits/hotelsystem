@@ -32,6 +32,13 @@ import ApiError from '../utils/errors.js';
 export function validate(rules, source = 'body') {
     return async function validationMiddleware(req, res, next) {
         try {
+            // Recorded BEFORE the rules run. A sanitiser such as .trim() writes
+            // an empty string into a field the client never sent, which would
+            // make "cleared this value" indistinguishable from "did not mention
+            // this field". A partial update has to be able to tell them apart,
+            // so the keys that actually arrived are captured here.
+            const provided = new Set(Object.keys(req[source] || {}));
+
             // Execute every declared chain, collecting failures rather than
             // stopping at the first one, so the client can highlight all
             // invalid fields in a single round trip.
@@ -56,6 +63,14 @@ export function validate(rules, source = 'body') {
             req.validated = {
                 ...(req.validated || {}),
                 [source]: matchedData(req, { locations: [source], includeOptionals: false }),
+            };
+
+            // Companion to req.validated: the same fields, but only those the
+            // client really sent. Endpoints that treat a request as a partial
+            // update read this; a full-replace endpoint can ignore it.
+            req.provided = {
+                ...(req.provided || {}),
+                [source]: provided,
             };
 
             return next();

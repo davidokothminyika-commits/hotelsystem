@@ -617,4 +617,58 @@ CREATE TABLE IF NOT EXISTS notifications (
         FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
+-- ============================================================================
+--  SECTION 9 - SYSTEM BRANDING
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------
+-- system_settings
+-- The hotel's own name, logo and contact details, editable by an administrator
+-- from the admin Settings screen.
+--
+-- WHY A SINGLE ROW RATHER THAN A KEY/VALUE TABLE
+-- There is exactly one hotel, so the row is pinned to id = 1 by a CHECK
+-- constraint. A key/value table would allow nonsense keys and would need a
+-- JSON blob or a row per key; one row with named columns keeps the contract
+-- obvious and lets the database reject anything but the one legal row.
+--
+-- WHY THE LOGO IS A PATH, NOT A BLOB
+-- The file lives outside the web root in uploads/hotel/ and is streamed by
+-- GET /api/settings/logo. Storing bytes in the row would duplicate the file,
+-- bloat every settings read and make the upload endpoint's job impossible.
+--
+-- `logo_url` is the alternative to an upload: a logo already hosted elsewhere
+-- (a CDN, the brand agency) is stored as an absolute http(s) URL and takes
+-- precedence over `logo_path`. Exactly one is expected to be set.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS system_settings (
+    id             TINYINT UNSIGNED NOT NULL DEFAULT 1,
+    system_name    VARCHAR(120) NOT NULL DEFAULT 'Aurelia Grand Hotel',
+    -- The small line under the wordmark, e.g. 'Nairobi, Kenya'. Optional.
+    tagline        VARCHAR(150) NULL,
+    -- Stored path under uploads/, e.g. 'hotel/abc123.png'. Set by the
+    -- multipart upload endpoint.
+    logo_path      VARCHAR(255) NULL,
+    -- Absolute http(s) URL for a logo hosted elsewhere.
+    logo_url       VARCHAR(500) NULL,
+    contact_phone  VARCHAR(40)  NULL,
+    contact_email  VARCHAR(190) NULL,
+    contact_address VARCHAR(255) NULL,
+    -- Who changed the branding and when. SET NULL so the settings row survives
+    -- the deletion of the administrator who set it.
+    updated_by     BIGINT UNSIGNED NULL,
+    updated_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    CONSTRAINT chk_system_settings_single_row CHECK (id = 1),
+    CONSTRAINT fk_system_settings_updated_by
+        FOREIGN KEY (updated_by) REFERENCES users (id) ON DELETE SET NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- The single settings row. ON DUPLICATE KEY UPDATE makes re-running the
+-- schema a no-op instead of an error, and deliberately does NOT overwrite
+-- edited values: the defaults below only apply the very first time.
+INSERT INTO system_settings (id, system_name, tagline, contact_phone, contact_email, contact_address)
+VALUES (1, 'Aurelia Grand Hotel', 'Nairobi, Kenya', '+254 700 000 000', 'reservations@example.com', '24 Riverside Drive, Nairobi, Kenya')
+ON DUPLICATE KEY UPDATE id = id;
+
 SET FOREIGN_KEY_CHECKS = 1;

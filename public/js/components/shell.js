@@ -21,6 +21,7 @@
  *        -> initSidebar(user)
  */
 import { initApp, requireAuth, requireRole } from '../app.js';
+import { brandName } from './branding.js';
 import { initSidebar } from './sidebar.js';
 import { getElement } from '../lib/dom.js';
 
@@ -44,7 +45,9 @@ export async function buildShell({ title, subtitle = '', roles = [], header = tr
     await initApp({ footer: false, sidebar: true });
     initSidebar(user);
 
-    document.title = `${title} | Aurelia Grand Hotel`;
+    // The configured hotel name, not a hard coded one: the branding has
+    // already loaded by this point because initApp ran above.
+    document.title = `${title} | ${brandName()}`;
 
     const root = document.getElementById('app-root');
     if (!root) {

@@ -21,14 +21,13 @@
         <div class="flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-16">
             <div class="mx-auto w-full max-w-sm" data-reveal>
 
-                <!-- Brand -->
+                <!-- Brand. Filled in by /js/components/branding.js so the
+                     configured hotel name and logo appear here too. -->
                 <a href="/" class="inline-flex items-center gap-2.5 mb-10">
-                    <span class="flex items-center justify-center w-10 h-10 rounded-lg bg-amber-600 text-stone-900">
-                        <i class="fa-solid fa-hotel" aria-hidden="true"></i>
-                    </span>
+                    <span data-brand="logo" class="flex items-center justify-center w-10 h-10 rounded-lg bg-amber-600 text-stone-900"></span>
                     <span>
-                        <span class="block text-base font-semibold text-stone-900 leading-tight">Aurelia Grand Hotel</span>
-                        <span class="block text-xs text-stone-500">Nairobi, Kenya</span>
+                        <span class="block text-base font-semibold text-stone-900 leading-tight" data-brand="name">Aurelia Grand Hotel</span>
+                        <span class="block text-xs text-stone-500" data-brand="tagline">Nairobi, Kenya</span>
                     </span>
                 </a>
 
@@ -89,6 +88,15 @@
                     <a href="/pages/auth/register.html" class="text-amber-700 font-medium hover:underline">Create an account</a>
                 </p>
 
+                <!-- Way back to the welcome page for anyone who only meant to browse -->
+                <p class="text-center mt-4">
+                    <a href="/"
+                       class="inline-flex items-center gap-1.5 text-xs text-stone-500 hover:text-stone-800">
+                        <i class="fa-solid fa-arrow-left text-[10px]" aria-hidden="true"></i>
+                        Back to the welcome page
+                    </a>
+                </p>
+
                 <!-- Demo accounts make the system explorable without setup -->
                 <div class="mt-8 pt-6 border-t border-stone-200">
                     <p class="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-3">
@@ -129,10 +137,15 @@
         import { showAlert, showFieldErrors, clearFieldErrors } from '/js/components/notification.js';
         import { setButtonLoading, getQueryParam } from '/js/lib/dom.js';
         import { initMotion } from '/js/lib/motion.js';
+        import { initBranding } from '/js/components/branding.js';
 
         // These pages deliberately skip initApp(): there is no header or footer
         // to load, so motion is started directly instead.
         initMotion();
+
+        // These pages have no shared header, so they load the hotel's name and
+        // logo themselves rather than through initApp().
+        await initBranding();
 
         const form = document.getElementById('login-form');
         const alertBox = document.getElementById('form-alert');

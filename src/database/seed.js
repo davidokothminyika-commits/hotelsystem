@@ -619,6 +619,9 @@ async function reset() {
         'booking_guests', 'bookings',
         'room_amenities', 'rooms', 'amenities', 'room_types',
         'password_resets', 'email_verification_tokens', 'audit_logs', 'users',
+        // The branding row is deliberately kept: `npm run db:reset` clears
+        // business data, but wiping the hotel's name and logo would silently
+        // rename the site for anyone who had configured it.
         'role_permissions', 'permissions', 'roles',
     ];
 

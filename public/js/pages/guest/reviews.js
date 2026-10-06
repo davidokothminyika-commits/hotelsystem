@@ -80,6 +80,13 @@ if (shell?.content) {
                         button.className = active ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
                         button.setAttribute('aria-pressed', String(active));
                     }
+                    // All three panels are scoped to the selection, not just the
+                    // list. Refetching only the list left the write panel showing
+                    // the previous entity's review, so a guest who had already
+                    // reviewed the hotel was never offered the form for the
+                    // entities they had not reviewed yet.
+                    loadStats();
+                    loadMyReview();
                     loadReviews();
                 },
             }),

@@ -13,6 +13,7 @@
  *   /api/auth/*        -> auth.routes.js
  *   /api/users/*       -> users.routes.js
  *   /api/rooms/*       -> rooms.routes.js
+ *   /api/reports/*     -> reports.routes.js
  *   ...
  * Each router declares only its own sub-paths.
  *
@@ -34,6 +35,7 @@ import messageRoutes from './messages.routes.js';
 import notificationRoutes from './notifications.routes.js';
 import auditRoutes from './audit.routes.js';
 import settingsRoutes from './settings.routes.js';
+import reportRoutes from './reports.routes.js';
 
 const router = Router();
 
@@ -77,5 +79,8 @@ router.use('/settings', settingsRoutes);
 // admin.routes.js as `router.use(requireRole('admin'))`, so every route added
 // to that file is protected automatically.
 router.use('/admin', adminRoutes);
+// Same pattern as admin: the `report:read` permission guard lives inside
+// reports.routes.js, so every route added there is protected automatically.
+router.use('/reports', reportRoutes);
 
 export default router;

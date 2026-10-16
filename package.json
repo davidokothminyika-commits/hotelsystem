@@ -12,6 +12,7 @@
         "start": "node src/server.js",
         "seed": "node src/database/seed.js",
         "db:reset": "node src/database/seed.js --reset",
+        "db:schema": "node scripts/apply-schema.mjs",
         "test": "node --test tests/*.test.js",
         "test:watch": "node --test --watch tests/*.test.js",
         "check:pages": "node scripts/check-pages.mjs",

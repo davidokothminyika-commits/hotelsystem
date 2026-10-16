@@ -245,6 +245,46 @@ CREATE TABLE IF NOT EXISTS room_amenities (
 --  SECTION 3 - BOOKINGS
 -- ============================================================================
 
+-- ---------------------------------------------------------------------------
+-- booking_groups
+-- A block of rooms held for one party: a tour operator, a conference, a
+-- wedding. The group owns the dates and the contact; each room in the block is
+-- still an ordinary bookings row, so availability, check-in, invoicing and
+-- every existing rule keep working on the individual reservations.
+--
+-- WHY THE LINK LIVES ON bookings (bookings.group_id) AND NOT A JOIN TABLE
+-- A booking belongs to at most one group, which is exactly a nullable foreign
+-- key. A membership table would allow the same booking to be counted twice.
+--
+-- The group carries its own dates rather than deriving them from its bookings:
+-- an empty or partly-filled group still has to know when it arrives, and a
+-- booking added later must fall inside the block rather than redefine it.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS booking_groups (
+    id               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    group_reference  CHAR(10)        NOT NULL,
+    name             VARCHAR(120)    NOT NULL COMMENT 'Party or company name',
+    contact_name     VARCHAR(80)     NULL,
+    contact_email    VARCHAR(190)    NULL,
+    contact_phone    VARCHAR(40)     NULL,
+    check_in         DATE            NOT NULL,
+    check_out        DATE            NOT NULL,
+    status           ENUM('tentative', 'confirmed', 'cancelled')
+                         NOT NULL DEFAULT 'tentative',
+    notes            VARCHAR(500)    NULL,
+    created_by       BIGINT UNSIGNED NULL,
+    confirmed_at     DATETIME        NULL,
+    cancelled_at     DATETIME        NULL,
+    created_at       TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at       TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_booking_groups_reference (group_reference),
+    KEY ix_booking_groups_status (status),
+    KEY ix_booking_groups_dates (check_in, check_out),
+    CONSTRAINT fk_booking_groups_created_by
+        FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE SET NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS bookings (
     id                BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     -- Human readable reference shown on invoices and confirmations.
@@ -271,13 +311,16 @@ CREATE TABLE IF NOT EXISTS bookings (
     checked_in_at     DATETIME         NULL,
     checked_out_at    DATETIME         NULL,
     cancelled_at      DATETIME         NULL,
-    cancellation_reason VARCHAR(255)   NULL,
-    created_by        BIGINT UNSIGNED NULL COMMENT 'staff member who booked on behalf of a guest',
-    created_at        TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at        TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    cancellation_reason VARCHAR(255)   NULL,    created_by        BIGINT UNSIGNED NULL COMMENT 'staff member who booked on behalf of a guest',
+    -- Set when this reservation is one room inside a group block. NULL is the
+    -- ordinary single booking and stays the overwhelming majority of rows.
+    group_id          BIGINT UNSIGNED NULL,
+    created_at        TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at        TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     UNIQUE KEY uq_bookings_reference (booking_reference),
     KEY ix_bookings_user (user_id),
+    KEY ix_bookings_group (group_id),
     KEY ix_bookings_room (room_id),
     KEY ix_bookings_status (status),
     KEY ix_bookings_checkin (check_in),
@@ -291,7 +334,11 @@ CREATE TABLE IF NOT EXISTS bookings (
     CONSTRAINT fk_bookings_room
         FOREIGN KEY (room_id) REFERENCES rooms (id) ON DELETE RESTRICT,
     CONSTRAINT fk_bookings_created_by
-        FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE SET NULL
+        FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE SET NULL,
+    -- SET NULL rather than RESTRICT: deleting a group must not delete the
+    -- reservations inside it, and the bookings keep their history either way.
+    CONSTRAINT fk_bookings_group
+        FOREIGN KEY (group_id) REFERENCES booking_groups (id) ON DELETE SET NULL
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 -- Additional guests on a booking (the primary guest is bookings.user_id).
@@ -307,6 +354,45 @@ CREATE TABLE IF NOT EXISTS booking_guests (
     KEY ix_booking_guests_booking (booking_id),
     CONSTRAINT fk_booking_guests_booking
         FOREIGN KEY (booking_id) REFERENCES bookings (id) ON DELETE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- folio_entries
+-- The room account (folio) for one booking: every extra charge and every
+-- credit posted by the front desk, kept as an append-only ledger.
+--
+-- WHY THE LEDGER IS SEPARATE FROM bookings.subtotal
+-- `bookings.subtotal` is the current state of the bill; `folio_entries` is the
+-- history that explains it. The service recomputes the booking's totals from
+-- the room rate plus the not-voided entries every time one is posted or voided,
+-- so the two can never drift apart, and an auditor can still see who posted
+-- the minibar charge on Tuesday and who took it back off.
+--
+-- Entries are never deleted: voiding stamps `voided_at` and the recompute
+-- ignores them. `amount` is always positive and `entry_type` decides the sign,
+-- because a negative amount in one column and a type in another is a standing
+-- invitation to double-negate a credit.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS folio_entries (
+    id           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    booking_id   BIGINT UNSIGNED NOT NULL,
+    entry_type   ENUM('charge', 'credit') NOT NULL,
+    description  VARCHAR(160)    NOT NULL,
+    amount       DECIMAL(12, 2)  NOT NULL COMMENT 'always positive; entry_type decides the sign',
+    created_by   BIGINT UNSIGNED NULL,
+    voided_at    DATETIME        NULL,
+    voided_by    BIGINT UNSIGNED NULL,
+    void_reason  VARCHAR(255)    NULL,
+    created_at   TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY ix_folio_entries_booking (booking_id, created_at),
+    CONSTRAINT fk_folio_entries_booking
+        FOREIGN KEY (booking_id) REFERENCES bookings (id) ON DELETE CASCADE,
+    CONSTRAINT fk_folio_entries_created_by
+        FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE SET NULL,
+    CONSTRAINT fk_folio_entries_voided_by
+        FOREIGN KEY (voided_by) REFERENCES users (id) ON DELETE SET NULL,
+    CONSTRAINT chk_folio_entries_amount CHECK (amount > 0)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 -- ============================================================================
@@ -670,5 +756,189 @@ CREATE TABLE IF NOT EXISTS system_settings (
 INSERT INTO system_settings (id, system_name, tagline, contact_phone, contact_email, contact_address)
 VALUES (1, 'Aurelia Grand Hotel', 'Nairobi, Kenya', '+254 700 000 000', 'reservations@example.com', '24 Riverside Drive, Nairobi, Kenya')
 ON DUPLICATE KEY UPDATE id = id;
+
+-- ============================================================================
+--  SECTION 10 - MAINTENANCE, RATES AND OPEN API
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------
+-- maintenance_tickets
+-- Repair work orders raised by staff against a room or a public area.
+--
+-- WHY room_id IS NULLABLE
+-- A broken lift, a leaking roof or a flickering light in the lobby is real
+-- work but belongs to no room. Forcing a room would have produced invented
+-- room links, and the room status automation would then have taken a
+-- sellable room out of inventory for a lobby repair.
+--
+-- The status machine is deliberately small: open -> in_progress -> resolved,
+-- with cancelled as the escape hatch for a ticket raised in error.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS maintenance_tickets (
+    id                BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    ticket_number     CHAR(10)        NOT NULL,
+    room_id           INT UNSIGNED    NULL,
+    title             VARCHAR(150)    NOT NULL,
+    description       TEXT            NULL,
+    priority          ENUM('low', 'normal', 'high', 'urgent')
+                          NOT NULL DEFAULT 'normal',
+    status            ENUM('open', 'in_progress', 'resolved', 'cancelled')
+                          NOT NULL DEFAULT 'open',
+    reported_by       BIGINT UNSIGNED NULL,
+    assigned_to       BIGINT UNSIGNED NULL,
+    resolved_at       DATETIME        NULL,
+    resolution_notes  VARCHAR(500)    NULL,
+    created_at        TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at        TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_maintenance_tickets_number (ticket_number),
+    KEY ix_maintenance_tickets_status (status, priority),
+    KEY ix_maintenance_tickets_room (room_id),
+    CONSTRAINT fk_maintenance_tickets_room
+        FOREIGN KEY (room_id) REFERENCES rooms (id) ON DELETE SET NULL,
+    CONSTRAINT fk_maintenance_tickets_reported_by
+        FOREIGN KEY (reported_by) REFERENCES users (id) ON DELETE SET NULL,
+    CONSTRAINT fk_maintenance_tickets_assigned_to
+        FOREIGN KEY (assigned_to) REFERENCES users (id) ON DELETE SET NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- rate_rules
+-- Dynamic pricing: named adjustments applied on top of a room's base rate.
+--
+-- TWO TRIGGER TYPES IN ONE TABLE
+--   date_range : a season, a weekend uplift, a discount for a quiet week.
+--                Evaluated against each night of the stay (and the optional
+--                day-of-week set) between start_date and end_date.
+--   occupancy  : a yield rule. Evaluated against how full the hotel is on
+--                that night, e.g. "above 80% full, add 15%".
+-- They share everything else - scope, adjustment, priority, active flag - so
+-- a second table would have been two near-identical schemas for one pricing
+-- decision.
+--
+-- adjustment_value is signed: +15 raises the rate, -10 discount it. `percent`
+-- is a percentage of the base rate for that night, `fixed` is an amount in the
+-- booking currency. Rules stack additively on the base rather than compounding
+-- on each other, so the price is reproducible by hand from the rule list.
+--
+-- A stay is quoted as the mean of its nightly rates rounded to two decimals,
+-- which keeps `price_per_night * nights == subtotal` exactly as before dynamic
+-- pricing existed.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS rate_rules (
+    id                INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    name              VARCHAR(80)  NOT NULL,
+    -- SMALLINT UNSIGNED, not INT: room_types.id is SMALLINT and MySQL rejects
+    -- an FK whose types differ, however subtly.
+    room_type_id      SMALLINT UNSIGNED NULL COMMENT 'NULL applies to every room type',
+    trigger_type      ENUM('date_range', 'occupancy') NOT NULL DEFAULT 'date_range',
+    start_date        DATE         NULL COMMENT 'date_range: first night the rule covers',
+    end_date          DATE         NULL COMMENT 'date_range: last night the rule covers',
+    days_of_week      SET('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun')
+                         NULL COMMENT 'empty set means every night',
+    occupancy_threshold DECIMAL(5, 2) NULL COMMENT 'occupancy: minimum percent full',
+    adjustment_type   ENUM('percent', 'fixed') NOT NULL DEFAULT 'percent',
+    adjustment_value  DECIMAL(8, 2) NOT NULL,
+    priority          SMALLINT     NOT NULL DEFAULT 100 COMMENT 'lower runs first',
+    is_active         TINYINT(1)   NOT NULL DEFAULT 1,
+    created_by        BIGINT UNSIGNED NULL,
+    created_at        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_rate_rules_name (name),
+    KEY ix_rate_rules_active (is_active, trigger_type),
+    CONSTRAINT fk_rate_rules_room_type
+        FOREIGN KEY (room_type_id) REFERENCES room_types (id) ON DELETE CASCADE,
+    CONSTRAINT fk_rate_rules_created_by
+        FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE SET NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- api_keys
+-- Credentials for third-party systems reading the hotel's open API.
+--
+-- WHY ONLY THE HASH IS STORED
+-- The full key is shown exactly once, at creation. Storing a hash means a
+-- database leak cannot be replayed against the API, the same reasoning that
+-- keeps password_reset tokens hashed. `key_prefix` is the visible half so an
+-- administrator can tell two keys apart without ever seeing the secret.
+--
+-- Keys are not user sessions: they authenticate a *system*, expose only the
+-- read-only /api/external surface, and can be revoked instantly.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS api_keys (
+    id           INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    name         VARCHAR(80)  NOT NULL COMMENT 'Who this key is for, e.g. "Channel sync"',
+    key_prefix   CHAR(10)     NOT NULL COMMENT 'displayed in the UI, e.g. hk_ab12cd',
+    key_hash     CHAR(64)     NOT NULL COMMENT 'SHA-256 of the full key',
+    is_active    TINYINT(1)   NOT NULL DEFAULT 1,
+    last_used_at DATETIME     NULL,
+    created_by   BIGINT UNSIGNED NULL,
+    revoked_at   DATETIME     NULL,
+    created_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_api_keys_hash (key_hash),
+    UNIQUE KEY uq_api_keys_prefix (key_prefix),
+    KEY ix_api_keys_active (is_active),
+    CONSTRAINT fk_api_keys_created_by
+        FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE SET NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- webhook_endpoints
+-- Where the hotel pushes events: a CRM, a channel manager, an owner dashboard.
+--
+-- `events` is a SET so the subscription lives in one column and MySQL rejects
+-- an event name the application has never defined. The shared `secret` signs
+-- every delivery (HMAC-SHA256 in the x-webhook-signature header) so the
+-- receiver can verify the payload really came from this system.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS webhook_endpoints (
+    id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    url         VARCHAR(500) NOT NULL,
+    description VARCHAR(160) NULL,
+    events      SET('booking.created', 'booking.confirmed', 'booking.checked_in',
+                    'booking.checked_out', 'booking.cancelled',
+                    'payment.completed', 'payment.refunded',
+                    'order.created',
+                    'maintenance.ticket_created', 'maintenance.ticket_resolved',
+                    'ping') NOT NULL,
+    secret      VARCHAR(64)  NOT NULL COMMENT 'HMAC secret shown once at creation',
+    is_active   TINYINT(1)   NOT NULL DEFAULT 1,
+    created_by  BIGINT UNSIGNED NULL,
+    created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_webhook_endpoints_url (url),
+    KEY ix_webhook_endpoints_active (is_active),
+    CONSTRAINT fk_webhook_endpoints_created_by
+        FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE SET NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- webhook_deliveries
+-- One row per attempt queue entry, kept as the proof of what was sent, when
+-- and what the receiver answered. Without it a failed integration is only
+-- ever hearsay.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS webhook_deliveries (
+    id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    endpoint_id     INT UNSIGNED    NOT NULL,
+    event           VARCHAR(40)     NOT NULL,
+    payload         JSON            NOT NULL,
+    status          ENUM('pending', 'delivered', 'failed') NOT NULL DEFAULT 'pending',
+    attempts        TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    response_status SMALLINT        NULL,
+    last_error      VARCHAR(500)    NULL,
+    delivered_at    DATETIME        NULL,
+    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY ix_webhook_deliveries_endpoint (endpoint_id, created_at),
+    KEY ix_webhook_deliveries_status (status),
+    CONSTRAINT fk_webhook_deliveries_endpoint
+        FOREIGN KEY (endpoint_id) REFERENCES webhook_endpoints (id) ON DELETE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;

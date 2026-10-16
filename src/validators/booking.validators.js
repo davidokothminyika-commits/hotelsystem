@@ -23,7 +23,14 @@ const dateRule = (field, label) =>
         .withMessage(`${label} must be a valid date in YYYY-MM-DD format`)
         .toDate();
 
-const dateBodyRule = (field, label) =>
+/**
+ * A required date in YYYY-MM-DD that must also be a real calendar date.
+ *
+ * Exported for bookingGroup.validators.js: a group block has to obey the same
+ * calendar rules as a single reservation, and one definition is the only way
+ * the two paths stay in step.
+ */
+export const dateBodyRule = (field, label) =>
     body(field)
         .notEmpty()
         .withMessage(`${label} is required`)

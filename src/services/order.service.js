@@ -34,6 +34,7 @@ import { canTransition } from '../repositories/order.repository.js';
 import menuRepository from '../repositories/menu.repository.js';
 import bookingRepository from '../repositories/booking.repository.js';
 import notificationService from './notification.service.js';
+import webhookService from './webhook.service.js';
 
 /** Maximum quantity of one item per order, to stop runaway carts. */
 const MAX_ITEM_QUANTITY = 20;
@@ -182,6 +183,15 @@ const orderService = {
         await notificationService.notifyOrderPlaced(order).catch((error) =>
             console.error('[order] Notification failed:', error.message),
         );
+
+        webhookService.emit('order.created', {
+            orderReference: order.orderReference,
+            orderId: order.id,
+            fulfilmentType: order.fulfilmentType,
+            roomNumber: order.roomNumber,
+            totalAmount: order.totalAmount,
+            itemCount: Array.isArray(order.items) ? order.items.length : undefined,
+        });
 
         return order;
     },

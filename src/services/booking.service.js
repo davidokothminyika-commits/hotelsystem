@@ -41,6 +41,8 @@ import { parseDate, formatDate, nightsBetween, today } from '../utils/date.js';
 import bookingRepository from '../repositories/booking.repository.js';
 import roomRepository from '../repositories/room.repository.js';
 import notificationService from './notification.service.js';
+import rateService from './rate.service.js';
+import webhookService from './webhook.service.js';
 import mailService from './mail.service.js';
 import { PRICING, calculateTotals } from '../config/pricing.js';
 
@@ -54,8 +56,12 @@ export { PRICING, calculateTotals };
 /**
  * Validates the requested date window and returns normalised dates.
  * Every date rule lives here so no caller can skip a check.
+ *
+ * Exported because a group block covers the same calendar rules as a single
+ * booking: a block that could start in the past would create reservations the
+ * normal path refuses to make.
  */
-function validateStay(checkInValue, checkOutValue) {
+export function validateStay(checkInValue, checkOutValue) {
     const checkIn = parseDate(checkInValue);
     const checkOut = parseDate(checkOutValue);
 
@@ -119,6 +125,8 @@ const bookingService = {
      * @param {string} [input.specialRequests]
      * @param {number} [input.createdBy] Staff member booking on a guest's behalf.
      * @param {string[]} [input.guestNames] Additional guests on the reservation.
+     * @param {number|null} [input.groupId] Set when this reservation is one
+     *   room inside a group block (see booking_groups).
      */
     async createBooking(input) {
         const { checkIn, checkOut, nights } = validateStay(input.checkIn, input.checkOut);
@@ -153,7 +161,21 @@ const bookingService = {
             );
         }
 
-        const totals = calculateStayTotals(room.pricePerNight, nights);
+        // Dynamic pricing: the nightly rate for this particular stay comes
+        // from the rate rule engine, which falls back to the room's stored
+        // base rate when no rule applies (see rate.service.js). The room row
+        // itself is never modified - a rule's effect belongs to the stay being
+        // priced, not to the inventory.
+        let pricePerNight = room.pricePerNight;
+        try {
+            pricePerNight = await rateService.priceForStay(room, formatDate(checkIn), formatDate(checkOut));
+        } catch (error) {
+            // Pricing must never block a sale: without it we simply sell at
+            // the stored rate, which was the behaviour before rules existed.
+            console.error('[booking] Rate quote failed, using base rate:', error.message);
+        }
+
+        const totals = calculateStayTotals(pricePerNight, nights);
         const reference = await bookingRepository.generateReference();
 
         // Layers 2 and 3 live inside the transaction, in the repository.
@@ -168,7 +190,7 @@ const bookingService = {
                 adults: input.adults ?? input.guests ?? 1,
                 children: input.children ?? 0,
                 status: 'pending',
-                pricePerNight: room.pricePerNight,
+                pricePerNight,
                 nights,
                 subtotal: totals.subtotal,
                 taxAmount: totals.taxAmount,
@@ -176,6 +198,10 @@ const bookingService = {
                 totalAmount: totals.totalAmount,
                 specialRequests: input.specialRequests || null,
                 createdBy: input.createdBy || null,
+                // Always written, as NULL for an ordinary booking: the
+                // repository's parameter list is fixed and a missing key would
+                // be handed to mysql2 as `undefined`.
+                groupId: input.groupId || null,
             });
 
             if (created.conflict) {
@@ -207,6 +233,19 @@ const bookingService = {
         await notificationService.notifyBookingCreated(booking).catch((error) =>
             console.error('[booking] Notification failed:', error.message),
         );
+
+        webhookService.emit('booking.created', {
+            bookingReference: booking.bookingReference,
+            bookingId: booking.id,
+            roomNumber: booking.roomNumber,
+            roomType: booking.roomType,
+            checkIn: booking.checkIn,
+            checkOut: booking.checkOut,
+            totalAmount: booking.totalAmount,
+            guestName: booking.guestName,
+            guestEmail: booking.guestEmail,
+            groupId: booking.groupId,
+        });
 
         mailService.sendBookingConfirmation({
             to: input.guestEmail,
@@ -299,6 +338,15 @@ const bookingService = {
             console.error('[booking] Notification failed:', error.message),
         );
 
+        webhookService.emit('booking.confirmed', {
+            bookingReference: updated.bookingReference,
+            bookingId: updated.id,
+            checkIn: updated.checkIn,
+            checkOut: updated.checkOut,
+            guestName: updated.guestName,
+            guestEmail: updated.guestEmail,
+        });
+
         return updated;
     },
 
@@ -327,6 +375,15 @@ const bookingService = {
             console.error('[booking] Notification failed:', error.message),
         );
 
+        webhookService.emit('booking.checked_in', {
+            bookingReference: updated.bookingReference,
+            bookingId: updated.id,
+            roomNumber: updated.roomNumber,
+            checkIn: updated.checkIn,
+            checkOut: updated.checkOut,
+            guestName: updated.guestName,
+        });
+
         return updated;
     },
 
@@ -353,6 +410,14 @@ const bookingService = {
         await notificationService.notifyCheckedOut(updated).catch((error) =>
             console.error('[booking] Notification failed:', error.message),
         );
+
+        webhookService.emit('booking.checked_out', {
+            bookingReference: updated.bookingReference,
+            bookingId: updated.id,
+            roomNumber: updated.roomNumber,
+            totalAmount: updated.totalAmount,
+            amountPaid: updated.amountPaid,
+        });
 
         return updated;
     },
@@ -410,6 +475,13 @@ const bookingService = {
         await notificationService.notifyBookingCancelled(updated, reason).catch((error) =>
             console.error('[booking] Notification failed:', error.message),
         );
+
+        webhookService.emit('booking.cancelled', {
+            bookingReference: updated.bookingReference,
+            bookingId: updated.id,
+            reason: reason || null,
+            cancelledAt: updated.cancelledAt,
+        });
 
         return updated;
     },

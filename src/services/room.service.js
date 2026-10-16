@@ -17,6 +17,7 @@
  * Frontend: public/js/api/rooms.js, components/room-card.html
  */
 import ApiError from '../utils/errors.js';
+import rateService from './rate.service.js';
 import { parseDate, formatDate, nightsBetween, today } from '../utils/date.js';
 import { calculateTotals } from '../config/pricing.js';
 import roomRepository from '../repositories/room.repository.js';
@@ -72,11 +73,35 @@ const roomService = {
             sortDir,
         });
 
+        // One quote evaluation for the whole page of rooms, so a rule that
+        // applies to every room costs one occupancy query, not one per room.
+        const quoteStart = start || today();
+        const quoteEnd = end || new Date(quoteStart.getTime() + 86_400_000);
+        const quotes = await rateService
+            .quoteRooms(result.rows, { start: quoteStart, end: quoteEnd })
+            .catch((error) => {
+                // Search shows what a room costs; a failed rule evaluation
+                // must not blank the search results, so fall back to base
+                // rates, quoting every room unchanged.
+                console.error('[rooms] Rate quote failed, using base rates:', error.message);
+                return new Map();
+            });
+
         return {
             rooms: result.rows.map((room) => ({
                 ...room,
+                // Dynamic pricing: the rate rules engine resolves what this
+                // particular stay costs, and the card shows that number. The
+                // flat stored rate is still reported, so a guest can see when
+                // a rule helped them (discounted) or why it costs more.
+                quotedPricePerNight: quotes.get(room.id)?.pricePerNight ?? room.pricePerNight,
+                priceAdjusted: Boolean(quotes.get(room.id) && quotes.get(room.id).pricePerNight !== room.pricePerNight),
                 // Price for the requested stay, not just the nightly rate.
-                stayTotal: stay ? calculateTotals(room.pricePerNight * stay.nights).totalAmount : null,
+                // Computed from the quoted rate so the total a guest sees is
+                // the total they will be charged.
+                stayTotal: stay
+                    ? calculateTotals((quotes.get(room.id)?.pricePerNight ?? room.pricePerNight) * stay.nights).totalAmount
+                    : null,
             })),
             total: result.total,
             page: pagination.page,

@@ -107,12 +107,19 @@ const ROLE_PERMISSIONS = {
         'booking:checkin', 'room:read', 'room:status', 'user:read',
         'payment:create', 'payment:read', 'invoice:read', 'chat:reply',
         'review:moderate', 'order:read',
+        // The front desk posts room charges and credits to a guest's folio,
+        // reads maintenance tickets for the rooms it assigns, and needs a rate
+        // quote when a guest asks "what would this cost".
+        'folio:read', 'folio:write', 'maintenance:read', 'rate:read',
     ],
     restaurant_staff: [
         'order:read', 'order:update', 'menu:read', 'menu:write',
         'room:read', 'chat:reply', 'review:moderate',
     ],
-    housekeeping: ['room:read', 'room:status'],
+    // Housekeeping owns repair work: it raises tickets against rooms and moves
+    // them through to resolved. It has no billing permissions, so a folio is
+    // never reachable from this role.
+    housekeeping: ['room:read', 'room:status', 'maintenance:read', 'maintenance:write'],
     manager: [
         'booking:create', 'booking:read', 'booking:update', 'booking:cancel',
         'booking:checkin', 'room:read', 'room:create', 'room:update',
@@ -120,6 +127,9 @@ const ROLE_PERMISSIONS = {
         'menu:write', 'payment:read', 'payment:refund', 'invoice:read',
         'review:moderate', 'chat:reply', 'user:read', 'report:read',
         'audit:read',
+        'folio:read', 'folio:write',
+        'maintenance:read', 'maintenance:write',
+        'rate:read', 'rate:write',
     ],
     admin: Object.keys(PERMISSION_CATALOG),
 };
@@ -616,7 +626,12 @@ async function reset() {
         'notifications', 'messages', 'conversation_participants', 'conversations',
         'reviews', 'invoices', 'payments', 'order_items', 'orders',
         'menu_items', 'menu_categories',
-        'booking_guests', 'bookings',
+        // Children of bookings first: folio entries and the reservations inside
+        // a group both disappear with the booking, and the group row itself
+        // goes just before it does.
+        'folio_entries', 'booking_guests', 'booking_groups', 'bookings',
+        'webhook_deliveries', 'webhook_endpoints', 'api_keys',
+        'rate_rules', 'maintenance_tickets',
         'room_amenities', 'rooms', 'amenities', 'room_types',
         'password_resets', 'email_verification_tokens', 'audit_logs', 'users',
         // The branding row is deliberately kept: `npm run db:reset` clears

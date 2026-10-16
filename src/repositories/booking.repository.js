@@ -24,7 +24,7 @@ const SORTABLE_BOOKING_COLUMNS = ['b.created_at', 'b.check_in', 'b.check_out', '
 /** Statuses that occupy a room. A cancelled booking frees it again. */
 export const OCCUPYING_STATUSES = ['pending', 'confirmed', 'checked_in'];
 
-function mapBooking(row) {
+export function mapBooking(row) {
     if (!row) return null;
     return {
         id: row.id,
@@ -50,6 +50,7 @@ function mapBooking(row) {
         checkedOutAt: row.checked_out_at,
         cancelledAt: row.cancelled_at,
         cancellationReason: row.cancellation_reason,
+        groupId: row.group_id ?? null,
         createdAt: row.created_at,
         // Joined display fields.
         guestName: row.guest_name,
@@ -107,14 +108,14 @@ const bookingRepository = {
         }
 
         const [result] = await connection.execute(
-            `INSERT INTO bookings
+            `             INSERT INTO bookings
                (booking_reference, user_id, room_id, check_in, check_out, guests, adults, children,
                 status, price_per_night, nights, subtotal, tax_amount, service_charge, total_amount,
-                special_requests, created_by)
+                special_requests, created_by, group_id)
              VALUES
                (:bookingReference, :userId, :roomId, :checkIn, :checkOut, :guests, :adults, :children,
                 :status, :pricePerNight, :nights, :subtotal, :taxAmount, :serviceCharge, :totalAmount,
-                :specialRequests, :createdBy)`,
+                :specialRequests, :createdBy, :groupId)`,
             data,
         );
 
@@ -350,6 +351,37 @@ const bookingRepository = {
             { userId },
         );
         return mapBooking(row);
+    },
+
+    /**
+     * Sum of room-nights occupied inside a window, by booking status.
+     *
+     * Used by the yield (occupancy) rate rules: "what share of sellable
+     * capacity was taken on the nights being sold". A booking occupies
+     * nights, and its contribution is clipped to the window so a booking that
+     * starts before the window does not stand in for the whole window.
+     *
+     * @param {string} checkIn  Inclusive window start (YYYY-MM-DD).
+     * @param {string} checkOut Exclusive window end.
+     * @param {string[]} [statuses] Bookings to count; default is every status
+     *   that holds a room.
+     */
+    async countOccupiedRoomNights(checkIn, checkOut, statuses = OCCUPYING_STATUSES) {
+        const placeholders = statuses.map((_, index) => `:status${index}`).join(', ');
+        const row = await queryOne(
+            `SELECT COALESCE(SUM(
+                        GREATEST(0, TIMESTAMPDIFF(DAY, GREATEST(check_in, :checkIn), LEAST(check_out, :checkOut)))
+                    ), 0) AS total
+             FROM bookings
+             WHERE status IN (${placeholders})
+               AND check_in < :checkOut
+               AND check_out > :checkIn`,
+            Object.assign(
+                { checkIn, checkOut },
+                Object.fromEntries(statuses.map((status, index) => [`status${index}`, status])),
+            ),
+        );
+        return row ? { total: Number(row.total) } : { total: 0 };
     },
 
     /** Hotel-wide booking counts for the admin dashboard. */

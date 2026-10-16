@@ -40,6 +40,7 @@ import bookingRepository from '../repositories/booking.repository.js';
 import orderRepository from '../repositories/order.repository.js';
 import notificationService from './notification.service.js';
 import auditService, { AUDIT_ACTIONS } from './audit.service.js';
+import webhookService from './webhook.service.js';
 import { withTransaction } from '../config/db.js';
 
 /** Payment methods the simulated gateway accepts. */
@@ -288,6 +289,15 @@ const paymentService = {
         });
 
         await notificationService.notifyPaymentCompleted({ ...payment, invoiceId: invoice?.id });
+
+        webhookService.emit('payment.completed', {
+            paymentReference: payment.paymentReference,
+            amount: payment.amount,
+            currency: payment.currency,
+            method: payment.paymentMethod,
+            bookingReference: kind === PAYABLE.booking ? record.bookingReference || record.booking_reference : undefined,
+            invoiceNumber: invoice?.invoiceNumber,
+        });
         await auditService.record({
             userId: requester.id,
             action: AUDIT_ACTIONS.PAYMENT_COMPLETED,
@@ -332,6 +342,14 @@ const paymentService = {
             entity: 'payment',
             entityId: payment.id,
             metadata: { payment_reference: payment.paymentReference, reason: reason || null },
+        });
+
+        webhookService.emit('payment.refunded', {
+            paymentReference: payment.paymentReference,
+            amount: payment.amount,
+            currency: payment.currency,
+            method: payment.paymentMethod,
+            reason: reason || null,
         });
 
         return { payment: updated, message: result.message };

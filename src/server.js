@@ -17,6 +17,7 @@
 import env from './config/env.js';
 import { createApp } from './app.js';
 import { testConnection, closePool } from './config/db.js';
+import webhookService from './services/webhook.service.js';
 
 async function start() {
     // Fail fast and loudly. A misconfigured database should stop the process
@@ -37,6 +38,13 @@ async function start() {
     }
 
     const app = createApp();
+
+    // Outbound webhook delivery runs in this process: pending rows are
+    // retried on the interval below, and the delivery table is the durable
+    // record across restarts. Kept out of the tests' lifecycle because tests
+    // trigger deliveries explicitly where they need determinism.
+    webhookService.startFlusher();
+
     const server = app.listen(env.port, () => {
         console.log('');
         console.log('  ' + env.appName);
@@ -54,6 +62,7 @@ async function start() {
      */
     async function shutdown(signal) {
         console.log(`\n[server] ${signal} received, shutting down...`);
+        webhookService.stopFlusher();
         server.close(async () => {
             await closePool();
             console.log('[server] Shutdown complete');

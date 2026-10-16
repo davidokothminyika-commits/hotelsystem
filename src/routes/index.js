@@ -26,6 +26,7 @@ import userRoutes from './users.routes.js';
 import adminRoutes from './admin.routes.js';
 import roomRoutes from './rooms.routes.js';
 import bookingRoutes from './bookings.routes.js';
+import bookingGroupRoutes from './bookingGroup.routes.js';
 import menuRoutes from './menu.routes.js';
 import orderRoutes from './orders.routes.js';
 import paymentRoutes from './payments.routes.js';
@@ -36,6 +37,11 @@ import notificationRoutes from './notifications.routes.js';
 import auditRoutes from './audit.routes.js';
 import settingsRoutes from './settings.routes.js';
 import reportRoutes from './reports.routes.js';
+import folioRoutes from './folio.routes.js';
+import maintenanceRoutes from './maintenance.routes.js';
+import rateRoutes from './rate.routes.js';
+import integrationRoutes from './integration.routes.js';
+import externalRoutes from './external.routes.js';
 
 const router = Router();
 
@@ -59,6 +65,19 @@ router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/rooms', roomRoutes);
 router.use('/bookings', bookingRoutes);
+// Group blocks (allotments): each member is an ordinary booking with
+// group_id set, addressed as its own resource here.
+router.use('/booking-groups', bookingGroupRoutes);
+// The guest folio: charges, credits and voids against a reservation.
+router.use('/folios', folioRoutes);
+// Repair work orders. Room status follows the ticket lifecycle.
+router.use('/maintenance', maintenanceRoutes);
+// Dynamic pricing: rate rules and price quotes.
+router.use('/rates', rateRoutes);
+// Integration administration (API keys + webhooks). Admin guard is inside.
+router.use('/integrations', integrationRoutes);
+// The open API: read-only, machine-authenticated with API keys.
+router.use('/external', externalRoutes);
 router.use('/menu', menuRoutes);
 router.use('/orders', orderRoutes);
 router.use('/payments', paymentRoutes);

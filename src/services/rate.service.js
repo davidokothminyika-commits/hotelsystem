@@ -106,6 +106,13 @@ const rateService = {
         // distinct history, and it keeps the quote explainable with one number.
         const occupancyPercent = await this.occupancyPercent(start, end);
 
+        // Debug: log eligible rules
+        // eslint-disable-next-line no-console
+        if (process.env.DEBUG_RATES) {
+            console.log('DEBUG eligible rules:', eligible.map(r => ({ name: r.name, roomTypeId: r.roomTypeId })));
+            console.log('DEBUG rule dates:', eligible.map(r => ({ name: r.name, startDate: r.startDate, endDate: r.endDate, triggerType: r.triggerType })));
+        }
+
         const applied = [];
         const nightlyRates = [];
         let extras = 0;
@@ -114,13 +121,46 @@ const rateService = {
             // MySQL's DAYOFWEEK numbering starts at Sunday(1); JS getDay does
             // the same, so no offset is needed between the two.
             const dayName = DAYS[(cursor.getDay() + 6) % 7];
+            const cursorDate = formatDate(cursor);
 
             let adjustment = 0;
 
+            // Track rules extended to cover the whole stay
+            const extendedSingleDayRules = new Set();
+
             for (const rule of eligible) {
                 if (rule.triggerType === 'date_range') {
-                    if (rule.startDate && cursor < parseDate(rule.startDate)) continue;
-                    if (rule.endDate && cursor > parseDate(rule.endDate)) continue;
+                    // Date range rules apply to nights whose calendar date falls
+                    // within [startDate, endDate] inclusive.
+                    if (rule.startDate) {
+                        const ruleStart = parseDate(rule.startDate);
+                        if (ruleStart && cursorDate < formatDate(ruleStart)) continue;
+                    }
+                    if (rule.endDate) {
+                        const ruleEnd = parseDate(rule.endDate);
+                        if (ruleEnd && cursorDate > formatDate(ruleEnd)) continue;
+                    }
+
+                    // Single-day rule extension: when startDate === endDate, the rule
+                    // covers a single calendar date. If the stay starts on that date,
+                    // extend the rule to cover the entire stay so pricing is consistent
+                    // with what a guest sees for that check-in date.
+                    if (rule.startDate && rule.endDate && rule.startDate === rule.endDate) {
+                        const ruleDate = formatDate(parseDate(rule.startDate));
+
+                        if (cursorDate === ruleDate) {
+                            if (cursorDate === formatDate(start)) {
+                                // First night matches rule date - extend to whole stay
+                                extendedSingleDayRules.add(rule.id);
+                            }
+                        }
+
+                        // Apply rule: either extended (all nights) or matching the date
+                        if (!extendedSingleDayRules.has(rule.id) && cursorDate !== ruleDate) {
+                            continue;
+                        }
+                    }
+
                     if (rule.daysOfWeek.length > 0 && !rule.daysOfWeek.includes(dayName)) continue;
                 } else if (rule.triggerType === 'occupancy') {
                     const threshold = Number(rule.occupancyThreshold ?? 0);

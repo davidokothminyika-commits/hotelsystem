@@ -78,7 +78,52 @@ export const createRuleRules = [
  * the creation chains here is safe: the rules only fire when the client sent
  * the key.
  */
-export const updateRuleRules = createRuleRules;
+// Make adjustmentValue optional for PATCH (creation requires it, updates may omit it)
+export const updateRuleRules = [
+    body('name')
+        .optional({ values: 'falsy' })
+        .notEmpty()
+        .withMessage('Name the rule')
+        .bail()
+        .trim()
+        .isLength({ min: 2, max: 80 })
+        .withMessage('The name must be between 2 and 80 characters'),
+    body('roomTypeId')
+        .optional({ values: 'falsy' })
+        .isInt({ min: 1 })
+        .withMessage('Invalid room type')
+        .toInt(),
+    body('triggerType')
+        .optional()
+        .isIn(['date_range', 'occupancy'])
+        .withMessage('A rule is either a date range or occupancy based'),
+    dateBodyOptional('startDate', 'Start date'),
+    dateBodyOptional('endDate', 'End date'),
+    body('daysOfWeek')
+        .optional({ values: null })
+        .custom((value) => {
+            if (value === null) return true;
+            const chosen = Array.isArray(value) ? value : String(value).split(',').map((v) => v.trim()).filter(Boolean);
+            return chosen.length === 0 || chosen.every((d) => DAYS.includes(d));
+        })
+        .withMessage(`Days must be from: ${DAYS.join(', ')}`),
+    body('occupancyThreshold')
+        .optional({ values: null })
+        .isFloat({ min: 0, max: 100 })
+        .withMessage('The threshold must be a percentage between 0 and 100')
+        .toFloat(),
+    body('adjustmentType')
+        .optional()
+        .isIn(['percent', 'fixed'])
+        .withMessage('Adjust by percent or by a fixed amount'),
+    body('adjustmentValue')
+        .optional({ values: 'falsy' })
+        .isFloat({ nonzero: true })
+        .withMessage('The adjustment must not be zero')
+        .toFloat(),
+    body('priority').optional().isInt({ min: 1 }).withMessage('Invalid priority').toInt(),
+    body('isActive').optional().isBoolean().toBoolean(),
+];
 
 export const listRulesRules = [
     query('page').optional().isInt({ min: 1 }).withMessage('Invalid page number').toInt(),

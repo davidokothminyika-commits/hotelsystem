@@ -76,34 +76,36 @@ const maintenanceService = {
             if (!room) throw ApiError.notFound('Room not found', 'ROOM_NOT_FOUND');
         }
 
-        if (!PRIORITIES.includes(priority)) {
-            throw ApiError.badRequest('Choose a valid priority', 'INVALID_PRIORITY');
-        }
+        const effectivePriority = priority ?? 'normal';
 
-        const id = await maintenanceRepository.create({
-            ticketNumber: await maintenanceRepository.generateTicketNumber(),
-            roomId: room?.id ?? null,
-            title,
-            description: description || null,
-            priority,
-            reportedBy: requester.id,
-            assignedTo: assignedTo ?? undefined,
-        });
+    if (!PRIORITIES.includes(effectivePriority)) {
+        throw ApiError.badRequest('Choose a valid priority', 'INVALID_PRIORITY');
+    }
 
-        // A broken room must not be sold from the moment the ticket exists.
-        await syncRoomForStatus(room?.id ?? null, 'open');
+    const id = await maintenanceRepository.create({
+        ticketNumber: await maintenanceRepository.generateTicketNumber(),
+        roomId: room?.id ?? null,
+        title,
+        description: description || null,
+        priority: effectivePriority,
+        reportedBy: requester.id,
+        assignedTo: assignedTo ?? undefined,
+    });
 
-        const ticket = await this.getTicket(id);
+    // A broken room must not be sold from the moment the ticket exists.
+    await syncRoomForStatus(room?.id ?? null, 'open');
 
-        webhookService.emit('maintenance.ticket_created', {
-            ticketNumber: ticket.ticketNumber,
-            roomId: ticket.roomId,
-            roomNumber: ticket.roomNumber,
-            title: ticket.title,
-            priority: ticket.priority,
-        });
+    const ticket = await this.getTicket(id);
 
-        return ticket;
+    webhookService.emit('maintenance.ticket_created', {
+        ticketNumber: ticket.ticketNumber,
+        roomId: ticket.roomId,
+        roomNumber: ticket.roomNumber,
+        title: ticket.title,
+        priority: ticket.priority,
+    });
+
+    return ticket;
     },
 
     async getTicket(id) {
@@ -162,10 +164,12 @@ const maintenanceService = {
             }
         }
 
+        const effectivePriority = input.priority ?? ticket.priority;
+
         await maintenanceRepository.update(id, {
             title: input.title ?? undefined,
             description: input.description ?? undefined,
-            priority: input.priority ?? undefined,
+            priority: effectivePriority,
             status: input.status ?? undefined,
             assignedTo,
             // The repository's COALESCE keeps resolved_at once set; re-opening
